@@ -160,6 +160,65 @@
 
 \subsection{Dealing with concurrent \emph{simple} updates}
 
+\begin{algorithm}
+    \caption{Rename identifier}
+    \label{alg:renameId}
+    \begin{algorithmic}
+    \Function{renameId}{$\trm{id}, \trm{renamedIds}, \trm{nId}, \trm{nSeq}$}
+        \Statex \LeftComment{$\trm{id}$ is the identifier to rename}
+        \Statex \LeftComment{$\trm{renamedIds}$ is the former state shared by the \emph{rename} op}
+        \Statex \LeftComment{$\trm{nId}$ is $\trm{node~id}$ of the node which issued the \emph{rename} op}
+        \Statex \LeftComment{$\trm{nSeq}$ is $\trm{node~seq}$ of the node which issued the \emph{rename} op}
+        \\
+        \State $\trm{length} \gets \trm{renamedIds.length}$
+        \State $\trm{firstId} \gets \trm{renamedIds}[0]$
+        \State $\trm{lastId} \gets \trm{renamedIds}[\trm{length} - 1]$
+        \State $\trm{pos} \gets \trm{getPosition}(\trm{firstId})$
+        \\
+        \If{$\trm{id} < \trm{firstId}$}
+            \State $\trm{newFirstId} \gets \trm{new} \ \trm{Id}(\trm{pos}, \trm{nId}, \trm{nSeq}, 0)$
+            \State \Return $\trm{renameIdLessThanFirstId}(\trm{id}, \trm{firstId}, \trm{newFirstId})$
+        \ElsIf{$\trm{id} \in \trm{renameIds}$}
+            \State $\trm{index} \gets \trm{findIndex}(\trm{id}, \trm{renamedIds})$
+            \State \Return $\trm{renameIdFromIndex}(\trm{pos}, \trm{nId}, \trm{nSeq}, \trm{index})$
+        \ElsIf{$\trm{lastId} < \trm{id}$}
+            \State $\trm{newLastId} \gets \trm{new} \ \trm{Id}(\trm{pos}, \trm{nId}, \trm{nSeq}, \trm{length} - 1)$
+            \State \Return $\trm{renameIdGreaterThanLastId(\trm{id}, \trm{lastId}, \trm{newLastId})}$
+        \Else
+            \State \Return $\trm{renameIdFromPredecessorId}(\trm{id}, \trm{renamedIds})$
+        \EndIf
+    \EndFunction
+    \\
+    \Function{renameIdFromPredecessorId}{$\trm{id},\trm{renamedIds}$}
+        \State $\trm{index} \gets \trm{findIndexOfPred}(\trm{id}, \trm{renamedIds})$
+        \State $\trm{predId} \gets \trm{renamedIds}[\trm{index}]$
+        \State $\trm{newPredId} \gets \trm{new} \ \trm{Id}(\trm{pos}, \trm{nId}, \trm{nSeq}, \trm{index})$
+        \\
+        \If{$\trm{predId.length} + 1 < \trm{id.length}$}
+        \State $\trm{prefix} \gets \trm{concat}(\trm{predId}, \trm{MIN\_TUPLE})$
+            \State $\trm{tail} \gets \trm{getTail}(\trm{id}, \trm{prefix.length})$
+            \If{$\trm{isPrefix}(\trm{prefix}, \trm{id})$ \textbf{and} $\trm{tail} < \trm{predId}$}
+                \State \Return $\trm{concat}(\trm{newPredId}, \trm{tail})$
+            \EndIf
+        \EndIf
+        \\
+        \State $\trm{succId} \gets \trm{renamedIds}[\trm{index} + 1]$
+        \If{$\trm{succId.length} + 1 < \trm{id.length}$}
+            \State $\trm{offset} \gets \trm{getOffset}(\trm{succId}) - 1$
+            \State $\trm{predOfSuccId} \gets \trm{createIdFromBase}(\trm{succId}, \trm{offset})$
+            \State $\trm{prefix} \gets \trm{concat}(\trm{predOfSuccId}, \trm{MAX\_TUPLE})$
+            \State $\trm{tail} \gets \trm{getTail}(\trm{id}, \trm{prefix.length})$
+
+            \If{$\trm{isPrefix}(\trm{prefix}, \trm{id})$ \textbf{and} $\trm{succId} < \trm{tail}$}
+                \State \Return $\trm{concat}(\trm{newPredId}, \trm{tail})$
+            \EndIf
+        \EndIf
+        \\
+        \State \Return $\trm{concat}(\trm{newPredId}, \trm{id})$
+    \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
 \section{RenamableLogootSplit in distributed settings}
 \label{sec:renamablelogootsplit-distributed-settings}
 
@@ -323,7 +382,7 @@
     \item It can introduce a significant computational overhead in some cases
     \item For example a node may receive concurrent \emph{rename} operations in the reverse order to the one set by the \emph{priority} relation
     \item The node would then consider each operation as the primary one and rename its state in a successive manner
-    \item On the other, secondary remote \emph{rename} operations are cheap to integrate as nodes simply add to their state a reference to the corresponding \emph{former state}
+    \item On the other hand, secondary remote \emph{rename} operations are cheap to integrate as nodes simply add to their state a reference to the corresponding \emph{former state}
     \item To reduce the likelihood and the negative impact of the scenario described previously, we can decompose the integration of \emph{rename} operations into two parts in case of concurrency detection
     \item Nodes first process \emph{rename} operations as secondary ones. It enables nodes to integrate remote \emph{insert} and \emph{remove} operations, even from concurrent epochs, by transforming them
     \item Then once nodes obtain a given amount of confidence that one \emph{rename} operation is the primary one, proceed to the renaming of their states
@@ -337,6 +396,49 @@
 \subsection{The LSEQ approach}
 
 \section{Conclusions and future work}
+
+\appendix
+
+\section{Algorithms}
+
+\begin{algorithm}
+    \caption{Remaining functions to rename identifier}
+    \begin{algorithmic}
+
+    \Function{renameIdFromIndex}{$\trm{pos}, \trm{nId}, \trm{nSeq}, \trm{index}$}
+        \State \Return $\trm{new Id}(\trm{pos}, \trm{nId}, \trm{nSeq}, \trm{index})$
+    \EndFunction
+    \\
+    \Function{renameIdLessThanFirstId}{$\trm{id}, \trm{firstId}, \trm{newFirstId}$}
+        \State $\trm{offset} \gets \trm{getOffset}(\trm{firstId}) - 1$
+        \State $\trm{predOfFirstId} \gets \trm{createIdFromBase}(\trm{firstId}, \trm{offset})$
+        \State $\trm{predNewFirstId} \gets \trm{createIdFromBase}(\trm{newFirstId}, -1)$
+        \State $\trm{prefix} \gets \trm{concat}(\trm{predOfNewFirstId}, \trm{MAX\_TUPLE})$
+
+        \If{$\trm{isPrefix}(\trm{prefix}, id)$}
+            \State $\trm{tail} \gets \trm{getTail}(\trm{id}, \trm{prefix.length})$
+            \State \Return $\trm{concat}(\trm{predNewFirstId}, \trm{tail})$
+        \ElsIf{$\trm{id} < \trm{newFirstId}$}
+            \State \Return $\trm{id}$
+        \Else
+            \State \Return $\trm{concat}(\trm{predNewFirstId}, \trm{id})$
+        \EndIf
+    \EndFunction
+    \\
+    \Function{renameIdGreaterThanFirstId}{$\trm{id}, \trm{lastId}, \trm{newLastId}$}
+        \State $\trm{prefix} \gets \trm{concat}(\trm{lastId}, \trm{MIN\_TUPLE})$
+
+        \If{$\trm{newLastId} < \trm{lastId}$ \textbf{and} $\trm{isPrefix}(\trm{prefix}, id)$}
+            \State $\trm{tail} \gets \trm{getTail}(\trm{id}, \trm{prefix.length})$
+            \State \Return $\trm{tail}$
+        \ElsIf{$\trm{newLastId} < \trm{id}$}
+            \State \Return $\trm{id}$
+        \Else
+            \State \Return $\trm{concat}(\trm{newLastId}, \trm{id})$
+        \EndIf
+    \EndFunction
+    \end{algorithmic}
+\end{algorithm}
 
 \bibliography{ref}
 
