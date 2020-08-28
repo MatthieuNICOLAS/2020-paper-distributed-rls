@@ -164,7 +164,7 @@
     \caption{Rename identifier}
     \label{alg:renameId}
     \begin{algorithmic}
-    \Function{renameId}{$\trm{id}, \trm{renamedIds}, \trm{nId}, \trm{nSeq}$}
+    \Function{renId}{$\trm{id}, \trm{renamedIds}, \trm{nId}, \trm{nSeq}$}
         \Statex \LeftComment{$\trm{id}$ is the identifier to rename}
         \Statex \LeftComment{$\trm{renamedIds}$ is the former state shared by the \emph{rename} op}
         \Statex \LeftComment{$\trm{nId}$ is $\trm{node~id}$ of the node which issued the \emph{rename} op}
@@ -177,19 +177,19 @@
         \\
         \If{$\trm{id} < \trm{firstId}$}
             \State $\trm{newFirstId} \gets \trm{new} \ \trm{Id}(\trm{pos}, \trm{nId}, \trm{nSeq}, 0)$
-            \State \Return $\trm{renameIdLessThanFirstId}(\trm{id}, \trm{firstId}, \trm{newFirstId})$
+            \State \Return $\trm{renIdLessThanFirstId}(\trm{id}, \trm{firstId}, \trm{newFirstId})$
         \ElsIf{$\trm{id} \in \trm{renameIds}$}
             \State $\trm{index} \gets \trm{findIndex}(\trm{id}, \trm{renamedIds})$
-            \State \Return $\trm{renameIdFromIndex}(\trm{pos}, \trm{nId}, \trm{nSeq}, \trm{index})$
+            \State \Return $\trm{renIdFromIndex}(\trm{pos}, \trm{nId}, \trm{nSeq}, \trm{index})$
         \ElsIf{$\trm{lastId} < \trm{id}$}
             \State $\trm{newLastId} \gets \trm{new} \ \trm{Id}(\trm{pos}, \trm{nId}, \trm{nSeq}, \trm{length} - 1)$
-            \State \Return $\trm{renameIdGreaterThanLastId(\trm{id}, \trm{lastId}, \trm{newLastId})}$
+            \State \Return $\trm{renIdGreaterThanLastId(\trm{id}, \trm{lastId}, \trm{newLastId})}$
         \Else
-            \State \Return $\trm{renameIdFromPredecessorId}(\trm{id}, \trm{renamedIds})$
+            \State \Return $\trm{renIdfromPredId}(\trm{id}, \trm{renamedIds})$
         \EndIf
     \EndFunction
     \\
-    \Function{renameIdFromPredecessorId}{$\trm{id},\trm{renamedIds}$}
+    \Function{renIdfromPredId}{$\trm{id},\trm{renamedIds}$}
         \State $\trm{index} \gets \trm{findIndexOfPred}(\trm{id}, \trm{renamedIds})$
         \State $\trm{predId} \gets \trm{renamedIds}[\trm{index}]$
         \State $\trm{newPredId} \gets \trm{new} \ \trm{Id}(\trm{pos}, \trm{nId}, \trm{nSeq}, \trm{index})$
@@ -204,7 +204,7 @@
         \\
         \State $\trm{succId} \gets \trm{renamedIds}[\trm{index} + 1]$
         \If{$\trm{succId.length} + 1 < \trm{id.length}$}
-            \State $\trm{offset} \gets \trm{getOffset}(\trm{succId}) - 1$
+            \State $\trm{offset} \gets \trm{getLastOffset}(\trm{succId}) - 1$
             \State $\trm{predOfSuccId} \gets \trm{createIdFromBase}(\trm{succId}, \trm{offset})$
             \State $\trm{prefix} \gets \trm{concat}(\trm{predOfSuccId}, \trm{MAX\_TUPLE})$
             \State $\trm{tail} \gets \trm{getTail}(\trm{id}, \trm{prefix.length})$
@@ -245,6 +245,55 @@
 \end{itemize}
 
 \subsection{Reverting \emph{rename} operations}
+
+\begin{algorithm}
+    \caption{Reverse rename identifier}
+    \label{alg:reverseRenameId}
+    \begin{algorithmic}
+    \Function{revRenId}{$\trm{id}, \trm{renamedIds}, \trm{nId}, \trm{nSeq}$}
+        \Statex \LeftComment{$\trm{id}$ is the identifier to reverse rename}
+        \Statex \LeftComment{$\trm{renamedIds}$ is the former state shared by the \emph{rename} op}
+        \Statex \LeftComment{$\trm{nId}$ is $\trm{node~id}$ of the node which issued the \emph{rename} op}
+        \Statex \LeftComment{$\trm{nSeq}$ is $\trm{node~seq}$ of the node which issued the \emph{rename} op}
+        \\
+        \State $\trm{length} \gets \trm{renamedIds.length}$
+        \State $\trm{firstId} \gets \trm{renamedIds}[0]$
+        \State $\trm{lastId} \gets \trm{renamedIds}[\trm{length} - 1]$
+        \State $\trm{pos} \gets \trm{getPosition}(\trm{firstId})$
+        \\
+        \State $\trm{predOfNewFirstId} \gets \trm{new Id}(\trm{pos}, \trm{nId}, \trm{nSeq}, -1)$
+        \State $\trm{newLastId} \gets \trm{new Id}(\trm{pos}, \trm{nId}, \trm{nSeq}, \trm{length} - 1)$
+        \\
+        \If{$\trm{id} < \trm{newFirstId}$}
+            \State \Return $\trm{revRenIdLessThanNewFirstId}(\trm{id}, \trm{firstId}, \trm{newFirstId})$
+        \ElsIf{$\trm{isRenamedId}(\trm{id}, \trm{pos}, \trm{nId}, \trm{nSeq}, \trm{length})$}
+            \State $\trm{index} \gets \trm{getFirstOffset}(\trm{id})$
+            \State \Return $\trm{renamedIds}[\trm{index}]$
+        \ElsIf{$\trm{newLastId} < \trm{id}$}
+            \State \Return $\trm{revRenIdGreaterThanNewLastId}(\trm{id}, \trm{lastId})$
+        \Else
+            \State $\trm{index} \gets \trm{getFirstOffset}(\trm{id})$
+            \State \Return $\trm{revRenIdfromPredId}(\trm{id}, \trm{renamedIds}, \trm{index})$
+        \EndIf
+    \EndFunction
+    \\
+    \Function{revRenIdfromPredId}{$\trm{id}, \trm{renamedIds}, \trm{index}$}
+        \State $\trm{predId} \gets \trm{renamedIds}[\trm{index}]$
+        \State $\trm{succId} \gets \trm{renamedIds}[\trm{index} + 1]$
+        \State $\trm{tail} \gets \trm{getTail}(\trm{id}, 1)$
+        \\
+        \If{$\trm{tail} < \trm{predId}$}
+            \State \Return $\trm{concat}(\trm{predId}, \trm{MIN\_TUPLE}, \trm{tail})$
+        \ElsIf{$\trm{succId} < \trm{tail}$}
+            \State $\trm{offset} \gets \trm{getLastOffset}(\trm{succId}) - 1$
+            \State $\trm{predOfSuccId} \gets \trm{createIdFromBase}(\trm{succId}, \trm{offset})$
+            \State \Return $\trm{concat}(\trm{predOfSuccId}, \trm{MAX\_TUPLE}, \trm{tail})$
+        \Else
+            \State \Return $\trm{tail}$
+        \EndIf
+    \EndFunction
+    \end{algorithmic}
+\end{algorithm}
 
 \begin{itemize}
     \item Nodes may have applied losing \emph{rename} operations
@@ -405,15 +454,15 @@
     \caption{Remaining functions to rename identifier}
     \begin{algorithmic}
 
-    \Function{renameIdFromIndex}{$\trm{pos}, \trm{nId}, \trm{nSeq}, \trm{index}$}
+    \Function{renIdFromIndex}{$\trm{pos}, \trm{nId}, \trm{nSeq}, \trm{index}$}
         \State \Return $\trm{new Id}(\trm{pos}, \trm{nId}, \trm{nSeq}, \trm{index})$
     \EndFunction
     \\
-    \Function{renameIdLessThanFirstId}{$\trm{id}, \trm{firstId}, \trm{newFirstId}$}
-        \State $\trm{offset} \gets \trm{getOffset}(\trm{firstId}) - 1$
+    \Function{renIdLessThanFirstId}{$\trm{id}, \trm{firstId}, \trm{newFirstId}$}
+        \State $\trm{offset} \gets \trm{getLastOffset}(\trm{firstId}) - 1$
         \State $\trm{predOfFirstId} \gets \trm{createIdFromBase}(\trm{firstId}, \trm{offset})$
+        \State $\trm{prefix} \gets \trm{concat}(\trm{predOfFirstId}, \trm{MAX\_TUPLE})$
         \State $\trm{predNewFirstId} \gets \trm{createIdFromBase}(\trm{newFirstId}, -1)$
-        \State $\trm{prefix} \gets \trm{concat}(\trm{predOfNewFirstId}, \trm{MAX\_TUPLE})$
 
         \If{$\trm{isPrefix}(\trm{prefix}, id)$}
             \State $\trm{tail} \gets \trm{getTail}(\trm{id}, \trm{prefix.length})$
@@ -425,16 +474,47 @@
         \EndIf
     \EndFunction
     \\
-    \Function{renameIdGreaterThanFirstId}{$\trm{id}, \trm{lastId}, \trm{newLastId}$}
+    \Function{renIdGreaterThanLastId}{$\trm{id}, \trm{lastId}, \trm{newLastId}$}
         \State $\trm{prefix} \gets \trm{concat}(\trm{lastId}, \trm{MIN\_TUPLE})$
 
-        \If{$\trm{newLastId} < \trm{lastId}$ \textbf{and} $\trm{isPrefix}(\trm{prefix}, id)$}
+        \If{$\trm{isPrefix}(\trm{prefix}, id)$}
             \State $\trm{tail} \gets \trm{getTail}(\trm{id}, \trm{prefix.length})$
             \State \Return $\trm{tail}$
         \ElsIf{$\trm{newLastId} < \trm{id}$}
             \State \Return $\trm{id}$
         \Else
+            \State \LeftComment{$\trm{lastId} < \trm{id} < \trm{newLastId}$}
             \State \Return $\trm{concat}(\trm{newLastId}, \trm{id})$
+        \EndIf
+    \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+    \caption{Remaining functions to reverse rename identifier}
+    \begin{algorithmic}
+
+    \Function{revRenIdLessThanNewFirstId}{$\trm{id}, \trm{firstId}, \trm{newFirstId}$}
+        \State $\trm{predNewFirstId} \gets \trm{createIdFromBase}(\trm{newFirstId}, -1)$
+        \If{$\trm{predNewFirstId} < \trm{id}$}
+            \State $\trm{tail} \gets \trm{getTail}(\trm{id}, 1)$
+            \If{$\trm{tail} < \trm{firstId}$}
+                \State \Return $\trm{tail}$
+            \Else
+                \State $\trm{offset} \gets \trm{getLastOffset}(\trm{firstId})$
+                \State $\trm{predFirstId} \gets \trm{createIdFromBase}(\trm{firstId}, \trm{offset}) $
+                \State \Return $\trm{concat}(\trm{predFirstId}, \trm{MAX\_TUPLE}, \trm{tail})$
+            \EndIf
+        \Else
+            \State \Return $\trm{id}$
+        \EndIf
+    \EndFunction
+    \\
+    \Function{revRenIdGreaterThanNewLastId}{$\trm{id}, \trm{lastId}$}
+        \If{$\trm{id} < \trm{lastId}$}
+            \State \Return $\trm{concat}(\trm{lastId}, \trm{MIN\_TUPLE}, \trm{id})$
+        \Else
+            \State \Return $\trm{id}$
         \EndIf
     \EndFunction
     \end{algorithmic}
