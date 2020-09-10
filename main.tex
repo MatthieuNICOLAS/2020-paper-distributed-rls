@@ -141,24 +141,22 @@
 
 \section{Overview}
 
-\subsection{System Model}
-
 \subsection{Proposed approach}
 
-\begin{itemize}
-    \item Propose a new \ac{CRDT}: \emph{RenamableLogootSplit}
-    \item Combines LogootSplit with a renaming mechanism
-    \item Purposes of this mechanism are to reassing shorter identifiers to elements and to aggregate them into fewer blocks in a fully distributed manner
-    \item Describe this new \ac{CRDT}'s behavior in centralised settings first in \autoref{sec:renamablelogootsplit-centralised-settings}, for the sake of simplicity
-    \item Describe its behavior in distributed settings in \autoref{sec:renamablelogootsplit-distributed-settings}
-\end{itemize}
+We propose a new Sequence \ac{CRDT} belonging to the variable-size identifiers approach : \emph{RenamableLogootSplit} (RLS).
 
-\section{RenamableLogootSplit in centralised settings}
-\label{sec:renamablelogootsplit-centralised-settings}
+This new \ac{CRDT} associates to LogootSplit a renaming mechanism.
+The goal of this mechanism is to overcome LogootSplit evergrowing memory overhead.
+To this end, the mechanism reassigns shorter identifiers to elements and aggregates them into fewer blocks in a fully distributed manner.
+
+We describe the behavior of the mechanism in \autoref{sec:renamablelogootsplit}.
+
+\subsection{System Model}
+
+\section{RenamableLogootSplit}
+\label{sec:renamablelogootsplit}
 
 \subsection{\emph{rename} operation}
-
-\subsection{Dealing with concurrent \emph{simple} updates}
 
 \begin{algorithm}
     \caption{Rename identifier}
@@ -218,9 +216,6 @@
     \EndFunction
     \end{algorithmic}
 \end{algorithm}
-
-\section{RenamableLogootSplit in distributed settings}
-\label{sec:renamablelogootsplit-distributed-settings}
 
 \begin{itemize}
     \item May encounter concurrent \emph{rename} operations in this setting
