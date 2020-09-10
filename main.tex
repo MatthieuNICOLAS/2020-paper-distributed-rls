@@ -229,7 +229,21 @@ We describe the behavior of the mechanism in \autoref{sec:renamablelogootsplit}.
     \end{itemize}
 \end{itemize}
 
+\mnnote{TODO: décrire le comportement de l'opération de renommage}
+
+\mnnote{TODO: diriger le lecteur vers le papier pour PaPoC pour la gestion des opés "simples" concurrentes}
+
+As no coordination is enforced between nodes, several may concurrently rename their respective states.
+However, the proposed \emph{rename} operation is not commutative with itself.
+Nodes encounter a conflict when dealing with several \emph{rename} operations concurrently issued.
+
+To ensure that they eventually converge, nodes have to solve this conflict. Notice that \emph{rename} operations are system operations : they have no impact on the content of the document and have no user intention attached. Nodes may thus solve the conflict by designating collegially with which \emph{rename} operation to proceed. We call the \emph{rename} operation with which nodes continue the \emph{primary} one. Others from the set of concurrent \emph{rename} operations are called the \emph{secondary} ones.
+
+In \autoref{sec:priority}, we present how nodes can select the \emph{primary rename} operation from a set of \emph{concurrent} ones in a coordination-free manner.
+
 \subsection{Breaking tie between concurrent \emph{rename} operations}
+\label{sec:priority}
+
 
 \begin{itemize}
     \item Define \emph{priority} between concurrent \emph{rename} operations to make this decision
