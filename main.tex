@@ -249,13 +249,24 @@ In \autoref{sec:priority}, we present how nodes can select the \emph{primary ren
 \subsection{Breaking tie between concurrent \emph{rename} operations}
 \label{sec:priority}
 
-\begin{itemize}
-    \item Define \emph{priority} between concurrent \emph{rename} operations to make this decision
-    \item A (total?) order relation between epochs \mnnote{NOTE: le \emph{total} dépend si on considère qu'on utilise \emph{priority} seulement pour trancher entre epochs concurrentes ou si on l'utilise aussi pour des epochs causalement liées}
-    \item May actually choose various strategies to define this relation
-    \item In this work, use lexicographical order as a tiebreaker between conflicting operations
-    \item But new strategies could be designed, for example based on metrics representing the accumulated work embodied by operations. This topic will be further discussed in \autoref{sec:designing-more-effective-priority-relation}
-\end{itemize}
+% \begin{itemize}
+%     \item Define \emph{priority} between concurrent \emph{rename} operations to make this decision
+%     \item A (total?) order relation between epochs \mnnote{NOTE: le \emph{total} dépend si on considère qu'on utilise \emph{priority} seulement pour trancher entre epochs concurrentes ou si on l'utilise aussi pour des epochs causalement liées}
+%     \item May actually choose various strategies to define this relation
+%     \item In this work, use lexicographical order as a tiebreaker between conflicting operations
+%     \item But new strategies could be designed, for example based on metrics representing the accumulated work embodied by operations. This topic will be further discussed in \autoref{sec:designing-more-effective-priority-relation}
+% \end{itemize}
+
+We define \emph{priority}, a total order relation between epochs.
+This relation enables nodes to designate the \emph{primary rename} operation from a set of concurrent ones, but also the current epoch from any set of \emph{rename} operations.
+
+To define the \emph{priority} relation, we may actually choose different strategies.
+In this work, we use the lexicographical order on the epoch identifiers as the \emph{priority} relation.
+An epoch identifier is obtained by concatening the \emph{node id} and \emph{node sequence number} of the author of the \emph{rename} operation to the current epoch identifier at the time.
+
+Other strategies could be proposed to define the \emph{priority} relation.
+For example, \emph{priority} could rely on metrics embedded in \emph{rename} operations representing the accumulated work on the document.
+This topic will be further discussed in \autoref{sec:designing-more-effective-priority-relation}.
 
 \subsection{Reverting \emph{rename} operations}
 
