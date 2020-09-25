@@ -26,6 +26,8 @@
 \definecolor{mydarkorange}{RGB}{244,109,67}
 \definecolor{mylightorange}{RGB}{252,153,54}
 \definecolor{mydarkred}{RGB}{215,48,39}
+\definecolor{mydarkpurple}{RGB}{140,107,177}
+\definecolor{mydarkpurpleid}{RGB}{136,86,167}
 }
 
 
@@ -409,6 +411,90 @@ The goals of \autoref{alg:revertRenameId} are the following :
     \item To assign new ids complying with the intended order to elements inserted causally after the reverted \emph{rename} operation.
 \end{enumerate*}
 
+\begin{figure}
+    \begin{subfigure}{\columnwidth}
+        \begin{tikzpicture}
+            \path
+                node {\textbf{A}}
+                to ++(0:\widthletter) node[block, fill=mydarkblue,
+                label={ [] below:{\color{mydarkblueid}\id{i}{A1}{0..1}} }
+                    ] {HE}
+                to ++(0:\widthblock) node[letter, fill=mylightblue,
+                        label={ [] above:{\color{mylightblue!20!mydarkblueid}\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}} }
+                    ] {L}
+                to ++(0:\widthletter) node[block, fill=mydarkblue,
+                        label={ [] below:{\color{mydarkblueid}\id{i}{A1}{2..3}} }
+                    ] (S1A-right) {LO};
+
+            \path
+            to ++(270:2) node {\textbf{B}}
+            to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+            to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
+            to ++(0:\widthletter) node[letter, fill=mylightorange, label=below:{\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}] {L}
+            to ++(0:\widthletter) node[block, label=above:{\id{i}{B0}{1..2}}] (S1B-right) {LO}
+            to ++(0:4 * \widthletter) node[block, fill=mydarkpurple,
+                    label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
+                ] (S2B) {HELLO};
+
+
+            \draw[->, thick] (S1B-right) -- node[below, align=center]{\emph{rename}} (S2B);
+        \end{tikzpicture}
+        \caption{Node B generating a concurrent \emph{rename} operation to one applied on node A}
+    \end{subfigure}
+    \begin{subfigure}{\columnwidth}
+        \begin{tikzpicture}
+            \path
+                node {\textbf{A}}
+                to ++(0:\widthletter) node[block, fill=mydarkblue,
+                label={ [] below:{\color{mydarkblueid}\id{i}{A1}{0..1}} }
+                    ] {HE}
+                to ++(0:\widthblock) node[letter, fill=mylightblue,
+                        label={ [] above:{\color{mylightblue!20!mydarkblueid}\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}} }
+                    ] {L}
+                to ++(0:\widthletter) node[block, fill=mydarkblue,
+                        label={ [] below:{\color{mydarkblueid}\id{i}{A1}{2..3}} }
+                    ] (S1A-right) {LO}
+                to ++(0:4 * \widthletter) node[letter, label=below:{\id{i}{B0}{0}}] (S2A-left) {H}
+                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
+                to ++(0:\widthletter) node[letter, fill=mylightorange, label=below:{\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}] {L}
+                to ++(0:\widthletter) node[block, label=above:{\id{i}{B0}{1..2}}] {LO};
+
+            \path
+            to ++(270:2) node {\textbf{B}}
+            to ++(0:\widthletter) node[block, fill=mydarkpurple,
+                    label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
+                ] (S2B) {HELLO};
+
+            \draw[dotted] (S1A-right.east) -- (S2A-left.west);
+            \draw[->, thick] (S2B.east) -- node[below right, align=center]{\emph{rename}} (S2A-left.west);
+        \end{tikzpicture}
+        \caption{Node A reverting the effect of the \emph{rename} operation it applied upon the reception of a new \emph{primary} one}
+    \end{subfigure}
+    \begin{subfigure}{\columnwidth}
+        \begin{tikzpicture}
+            \path
+                node {\textbf{A}}
+                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
+                to ++(0:\widthletter) node[letter, fill=mylightorange, label=below:{\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}] {L}
+                to ++(0:\widthletter) node[block, label=above:{\id{i}{B0}{1..2}}] (S2A-right) {LO}
+                to ++(0:4 * \widthletter) node[block, fill=mydarkpurple,
+                    label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
+                ] (S3A) {HELLO};
+
+            \path
+            to ++(270:2) node {\textbf{B}}
+            to ++(0:\widthletter) node[block, fill=mydarkpurple,
+                    label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
+                ] (S2B) {HELLO};
+
+            \draw[->, thick] (S2A-right) -- node[above, align=center]{\emph{rename}} (S3A);
+        \end{tikzpicture}
+        \caption{Node A then applying the \emph{primary rename} operation on its reverted state}
+    \end{subfigure}
+    \caption{Applying \emph{primary rename} operation on node \emph{A}}
+    \label{fig:revertRenameId}
+\end{figure}
 
 \subsection{Garbage collection of \emph{former states}}
 
