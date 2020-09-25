@@ -154,6 +154,8 @@ We describe the behavior of the mechanism in \autoref{sec:renamablelogootsplit}.
 
 \subsection{System Model}
 
+\mnnote{TODO: Reprendre la description du \emph{system model} de PaPoC}
+
 \section{RenamableLogootSplit}
 \label{sec:renamablelogootsplit}
 
@@ -218,19 +220,69 @@ We describe the behavior of the mechanism in \autoref{sec:renamablelogootsplit}.
     \end{algorithmic}
 \end{algorithm}
 
-\begin{itemize}
-    \item May encounter concurrent \emph{rename} operations in this setting
-    \item The \emph{rename} operation is not commutative with itself
-    \item Deal with a conflict in case of concurrent \emph{rename} operations
-    \item No user intention attached to \emph{rename} operations, operations behind the scene
-    \item Can actually solve the conflict by arbitrary deciding with which operation to continue
-    \begin{itemize}
-        \item Call the operation with which nodes continue the \emph{winning} one \mnnote{TODO: trouver un meilleur terme, "primary" ?}
-        \item Call the others the \emph{losing} ones \mnnote{TODO: trouver un meilleur terme, "secondary" ?}
-    \end{itemize}
-\end{itemize}
+% \begin{itemize}
+%     \item May encounter concurrent \emph{rename} operations in this setting
+%     \item The \emph{rename} operation is not commutative with itself
+%     \item Deal with a conflict in case of concurrent \emph{rename} operations
+%     \item No user intention attached to \emph{rename} operations, operations behind the scene
+%     \item Can actually solve the conflict by arbitrary deciding with which operation to continue
+%     \begin{itemize}
+%         \item Call the operation with which nodes continue the \emph{winning} one \mnnote{TODO: trouver un meilleur terme, "primary" ?}
+%         \item Call the others the \emph{losing} ones \mnnote{TODO: trouver un meilleur terme, "secondary" ?}
+%     \end{itemize}
+% \end{itemize}
 
 \mnnote{TODO: décrire le comportement de l'opération de renommage}
+
+\begin{figure}[ht!]
+    \begin{subfigure}{\columnwidth}
+        \begin{tikzpicture}
+            \path
+                node {\textbf{A}}
+                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
+                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (LO) {LO}
+                to ++(0:4 * \widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0}}] (H) {H};
+
+            \draw[->, thick] (LO) -- node[below, align=center]{\emph{rename}} (H);
+        \end{tikzpicture}
+        \caption{Selecting the new identifier of the first element}
+        \label{fig:renaming-first-id}
+    \end{subfigure}
+    \begin{subfigure}{\columnwidth}
+        \begin{tikzpicture}
+            \path
+                node {\textbf{A}}
+                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
+                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (LO) {LO}
+                to ++(0:4 * \widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0}}] (H) {H}
+                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{1}}] {E}
+                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{2}}] {L}
+                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{3}}] {0};
+
+                \draw[->, thick] (LO) -- node[below, align=center]{\emph{rename}} (H);
+            \end{tikzpicture}
+            \caption{Selecting the new identifiers of the remaining ones}
+        \label{fig:renaming-second-id}
+    \end{subfigure}
+    \begin{subfigure}{\columnwidth}
+        \begin{tikzpicture}
+            \path
+                node {\textbf{A}}
+                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
+                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (LO) {LO}
+                to ++(0:4 * \widthletter) node[block, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0..3}}] (HELO) {HELO};
+
+            \draw[->, thick] (LO) -- node[below, align=center]{\emph{rename}} (HELO);
+        \end{tikzpicture}
+        \caption{Final state obtained}
+        \label{fig:renaming-final-state}
+    \end{subfigure}
+    \caption{Renaming the sequence on node \emph{A}}
+    \label{fig:renaming}
+\end{figure}
 
 \mnnote{TODO: diriger le lecteur vers le papier pour PaPoC pour la gestion des opés "simples" concurrentes}
 
@@ -373,6 +425,8 @@ The goals of \autoref{alg:revertRenameId} are the following :
 \section{Evaluation}
 
 \subsection{Simulations and benchmarks}
+
+\mnnote{TODO: Reprendre la description du scénario et de l'implémentation des benchmarks de PaPoC, en modifiant seulement la partie concernant le bot qui effectue le renommage pour expliquer ici qu'on fait varier \emph{nbRenamingBots} en fonction de la simulation}
 
 \subsection{Results}
 
