@@ -71,6 +71,7 @@
 \acrodef{CRDT}[CRDT]{Conflict-free Replicated Data Type}
 \acrodefplural{CRDT}[CRDTs]{Conflict-free Replicated Data Types}
 \acrodef{JIT}[JIT]{Just-In-Time}
+\acrodef{LCA}[LCA]{Lowest Common Ancestor}
 \acrodef{OT}[OT]{Operational Transformation}
 \acrodefplural{OT}[OT]{Operational Transformations}
 \acrodef{P2P}[P2P]{Peer-to-Peer}
@@ -268,11 +269,42 @@ Other strategies could be proposed to define the \emph{priority} relation.
 For example, \emph{priority} could rely on metrics embedded in \emph{rename} operations representing the accumulated work on the document.
 This topic will be further discussed in \autoref{sec:designing-more-effective-priority-relation}.
 
+\subsection{Applying \emph{primary rename} operations}
+
+% \begin{itemize}
+%     \item Nodes may have applied losing \emph{rename} operations
+%     \item Have to revert the effects of losing operations before applying the winning one to ensure convergence
+%     \item Designed a dedicated function : \emph{reverseRenameId()}
+%     \item Its goals are the following:
+%     \begin{itemize}
+%         \item Revert ids to their former value, for ids generated before or concurrently to the applied \emph{rename} operation
+%         \item Generate new values complying with the intended order for ids generated after the applied \emph{rename} operation
+%     \end{itemize}
+% \end{itemize}
+
+Upon the reception of a \emph{rename} operation, nodes first have to determine if its introduce the new \emph{primary} epoch.
+To do so, they compare their current epoch to the new one using the \emph{priority} relation.
+If the new epoch is indeed the new \emph{primary} one, nodes have then to determine if they applied concurrent and conflicting \emph{rename} operations previously.
+To this end, nodes use the \emph{epoch tree}.
+
+Epochs are introduced by \emph{rename} operations, themselves issued from given epochs.
+We can thus establish the \emph{parent} relation between epochs.
+Using this relation, nodes are each able to build the \emph{epoch tree}.
+
+Using the \emph{epoch tree}, nodes are able to determine if their current epoch is the \emph{parent} of the new \emph{primary} one.
+If that is not the case, it means that they applied one or several concurrent \emph{rename} operations.
+
+In order to switch to the new \emph{primary} epoch, nodes first revert the effects of these concurrent \emph{rename} operations.
+To establish which operations to revert, nodes identify the \ac{LCA} of their current epoch and of the new \emph{primary} one.
+
 \subsection{Reverting \emph{rename} operations}
 
+Nodes have to revert \emph{rename} operations applied since the \ac{LCA} epoch between their current epoch and the new primary one, in the reverse order.
+To do so, nodes use \autoref{alg:revertRenameId}.
+
 \begin{algorithm}
-    \caption{Reverse rename identifier}
-    \label{alg:reverseRenameId}
+    \caption{Revert rename identifier}
+    \label{alg:revertRenameId}
     \begin{algorithmic}
     \Function{revRenId}{$\trm{id}, \trm{renamedIds}, \trm{nId}, \trm{nSeq}$}
         \Statex \LeftComment{$\trm{id}$ is the identifier to reverse rename}
@@ -319,16 +351,12 @@ This topic will be further discussed in \autoref{sec:designing-more-effective-pr
     \end{algorithmic}
 \end{algorithm}
 
-\begin{itemize}
-    \item Nodes may have applied losing \emph{rename} operations
-    \item Have to revert the effects of losing operations before applying the winning one to ensure convergence
-    \item Designed a dedicated function : \emph{reverseRenameId()}
-    \item Its goals are the following:
-    \begin{itemize}
-        \item Revert ids to their former value, for ids generated before or concurrently to the applied \emph{rename} operation
-        \item Generate new values complying with the intended order for ids generated after the applied \emph{rename} operation
-    \end{itemize}
-\end{itemize}
+The goals of \autoref{alg:revertRenameId} are the following :
+\begin{enumerate*}[label=(\roman*)]
+    \item To revert identifiers generated causally before or concurrently to the reverted \emph{rename} operation to their former value
+    \item To assign new ids complying with the intended order to elements inserted causally after the reverted \emph{rename} operation.
+\end{enumerate*}
+
 
 \subsection{Garbage collection of \emph{former states}}
 
