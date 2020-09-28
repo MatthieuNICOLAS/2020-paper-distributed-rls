@@ -410,15 +410,33 @@ The goals of \autoref{alg:revertRenameId} are the following :
     \item To revert identifiers generated causally before or concurrently to the reverted \emph{rename} operation to their former value
     \item To assign new ids complying with the intended order to elements inserted causally after the reverted \emph{rename} operation.
 \end{enumerate*}
+The \autoref{fig:revertRenameId} illustrates an example of its usage.
+
+This example describes the following scenario : in \autoref{fig:revertRenameId-concurrent-rename-operations}, node A and node B concurrently issue \emph{rename} operations.
+In \autoref{fig:revertRenameId-receive-primary-rename-operation}, node A receives node B's \emph{rename} operation.
+Upon its reception, node A compares its current epoch to the new epoch introduced.
+As $A < B$, node A deems this new epoch as the new primary one.
+To switch to this new \emph{primary} epoch, node A has to revert the effect of its \emph{rename} operation first.
+
+To this end, node A uses \autoref{alg:revertRenameId} to retrieve fitting counterparts for every identifiers of its current state.
+
+\mnnote{TODO: expliquer que l'on peut simplement inverser le renommage pour les identifiants renommés à partir de leur \emph{offset}, qui correspond en fait à leur index dans \emph{renamedIds}}
+
+\mnnote{TODO: expliquer que pour les autres identifiants, on peut revert le renommage en retournant l'identifiant tronqué de son préfixe, si cela satisfait la relation d'ordre avec les identifiants prédécesseur et successeur}
+
+\mnnote{TODO: expliquer que si ce n'est pas le cas, a recours à des tuples réservés au mécanisme de renommage, $MIN\_TUPLE$ et $MAX\_TUPLE$, pour maintenir l'ordre à travers les epochs}
 
 \begin{figure}
     \begin{subfigure}{\columnwidth}
         \begin{tikzpicture}
             \path
                 node {\textbf{A}}
-                to ++(0:\widthletter) node[block, fill=mydarkblue,
+                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
+                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0A-right) {LO}
+                to ++(0:5 * \widthletter) node[block, fill=mydarkblue,
                 label={ [] below:{\color{mydarkblueid}\id{i}{A1}{0..1}} }
-                    ] {HE}
+                    ] (S1A-left) {HE}
                 to ++(0:\widthblock) node[letter, fill=mylightblue,
                         label={ [] above:{\color{mylightblue!20!mydarkblueid}\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}} }
                     ] {L}
@@ -437,9 +455,13 @@ The goals of \autoref{alg:revertRenameId} are the following :
                 ] (S2B) {HELLO};
 
 
+            \draw[->, thick] (S0A-right) -- node[above, align=center]{\emph{rename}} (S1A-left);
+            \draw[dashed, ->, thick, shorten >= 3] (S1B-right.east) -- node[below right, align=center]{\emph{insert "l" at} {\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}} (S1A-left.west);
             \draw[->, thick] (S1B-right) -- node[below, align=center]{\emph{rename}} (S2B);
+
         \end{tikzpicture}
-        \caption{Node B generating a concurrent \emph{rename} operation to one applied on node A}
+        \caption{Node A and node B generating concurrent \emph{rename} operations}
+        \label{fig:revertRenameId-concurrent-rename-operations}
     \end{subfigure}
     \begin{subfigure}{\columnwidth}
         \begin{tikzpicture}
@@ -466,9 +488,10 @@ The goals of \autoref{alg:revertRenameId} are the following :
                 ] (S2B) {HELLO};
 
             \draw[dotted] (S1A-right.east) -- (S2A-left.west);
-            \draw[->, thick] (S2B.east) -- node[below right, align=center]{\emph{rename}} (S2A-left.west);
+            \draw[dashed, ->, thick] (S2B.east) -- node[below right, align=center]{\emph{rename}} (S2A-left.west);
         \end{tikzpicture}
         \caption{Node A reverting the effect of the \emph{rename} operation it applied upon the reception of a new \emph{primary} one}
+        \label{fig:revertRenameId-receive-primary-rename-operation}
     \end{subfigure}
     \begin{subfigure}{\columnwidth}
         \begin{tikzpicture}
@@ -495,6 +518,8 @@ The goals of \autoref{alg:revertRenameId} are the following :
     \caption{Applying \emph{primary rename} operation on node \emph{A}}
     \label{fig:revertRenameId}
 \end{figure}
+
+\mnnote{TODO: trouver comment illustrer les epochs, et notamment l'epoch courante, au niveau des représentations de la séquence répliquée de la \autoref{fig:revertRenameId}}
 
 \subsection{Garbage collection of \emph{former states}}
 
@@ -683,7 +708,7 @@ The goals of \autoref{alg:revertRenameId} are the following :
 \end{algorithm}
 
 \begin{algorithm}
-    \caption{Remaining functions to reverse rename identifier}
+    \caption{Remaining functions to revert identifier renaming}
     \begin{algorithmic}
 
     \Function{revRenIdLessThanNewFirstId}{$\trm{id}, \trm{firstId}, \trm{newFirstId}$}
