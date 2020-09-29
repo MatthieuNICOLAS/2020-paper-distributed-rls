@@ -48,6 +48,7 @@
 \newcommand{\set}[1]{\left\{#1\right\}} % set brace notation
 
 \newcommand{\id}[3]{$\trm{#1}^{\trm{#2}}_{\trm{#3}}$}
+\newcommand{\epoch}[1]{$\varepsilon_{#1}$}
 
 \newcommand{\widthletter}{7mm}
 \newcommand{\widthblock}{11mm}
@@ -57,6 +58,7 @@
     common/.style={anchor=west, draw, rectangle, minimum height=6mm},
     letter/.style={common, minimum width=\widthletter},
     block/.style={common, minimum width=\widthblock},
+    epoch/.style={letter, dotted, minimum width=\widthletter, minimum height=6mm},
     cross/.style={
         path picture={
             \draw[mydarkred, very thick]
@@ -241,12 +243,14 @@ We describe the behavior of the mechanism in \autoref{sec:renamablelogootsplit}.
         \begin{tikzpicture}
             \path
                 node {\textbf{A}}
+                to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
                 to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
                 to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
-                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (LO) {LO}
-                to ++(0:4 * \widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0}}] (H) {H};
+                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0A-right) {LO}
+                to ++(0:5 * \widthletter) node[epoch] (S1A-left) {\epoch{A1}}
+                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0}}] {H};
 
-            \draw[->, thick] (LO) -- node[below, align=center]{\emph{rename}} (H);
+            \draw[->, thick] (S0A-right) -- node[below, align=center]{\emph{rename to \epoch{A1}}} (S1A-left);
         \end{tikzpicture}
         \caption{Selecting the new identifier of the first element}
         \label{fig:renaming-first-id}
@@ -255,15 +259,17 @@ We describe the behavior of the mechanism in \autoref{sec:renamablelogootsplit}.
         \begin{tikzpicture}
             \path
                 node {\textbf{A}}
+                to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
                 to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
                 to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
-                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (LO) {LO}
-                to ++(0:4 * \widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0}}] (H) {H}
+                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0A-right) {LO}
+                to ++(0:5 * \widthletter) node[epoch] (S1A-left) {\epoch{A1}}
+                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0}}] {H}
                 to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{1}}] {E}
                 to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{2}}] {L}
                 to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{3}}] {0};
 
-                \draw[->, thick] (LO) -- node[below, align=center]{\emph{rename}} (H);
+                \draw[->, thick] (S0A-right) -- node[below, align=center]{\emph{rename to \epoch{A1}}} (S1A-left);
             \end{tikzpicture}
             \caption{Selecting the new identifiers of the remaining ones}
         \label{fig:renaming-second-id}
@@ -272,12 +278,14 @@ We describe the behavior of the mechanism in \autoref{sec:renamablelogootsplit}.
         \begin{tikzpicture}
             \path
                 node {\textbf{A}}
+                to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
                 to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
                 to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
-                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (LO) {LO}
-                to ++(0:4 * \widthletter) node[block, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0..3}}] (HELO) {HELO};
+                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0A-right) {LO}
+                to ++(0:5 * \widthletter) node[epoch] (S1A-left) {\epoch{A1}}
+                to ++(0:\widthletter) node[block, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0..3}}] {HELO};
 
-            \draw[->, thick] (LO) -- node[below, align=center]{\emph{rename}} (HELO);
+            \draw[->, thick] (S0A-right) -- node[below, align=center]{\emph{rename to \epoch{A1}}} (S1A-left);
         \end{tikzpicture}
         \caption{Final state obtained}
         \label{fig:renaming-final-state}
@@ -412,6 +420,111 @@ The goals of \autoref{alg:revertRenameId} are the following :
 \end{enumerate*}
 The \autoref{fig:revertRenameId} illustrates an example of its usage.
 
+\begin{figure}[ht!]
+    \begin{subfigure}{\columnwidth}
+        \begin{tikzpicture}
+            \path
+                node {\textbf{A}}
+                to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
+                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
+                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0A-right) {LO}
+                to ++(0:5 * \widthletter) node[epoch] (S1A-left)  {\epoch{A1}}
+                to ++(0:\widthletter) node[block, fill=mydarkblue,
+                label={below:{\color{mydarkblueid}\id{i}{A1}{0..1}} }
+                    ]{HE}
+                to ++(0:\widthblock) node[letter, fill=mylightblue,
+                        label={ [] above:{\color{mylightblue!20!mydarkblueid}\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}} }
+                    ] {L}
+                to ++(0:\widthletter) node[block, fill=mydarkblue,
+                        label={ [] below:{\color{mydarkblueid}\id{i}{A1}{2..3}} }
+                    ] {LO};
+
+            \path
+            to ++(270:2) node {\textbf{B}}
+            to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
+            to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+            to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
+            to ++(0:\widthletter) node[letter, fill=mylightorange, label=below:{\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}] {L}
+            to ++(0:\widthletter) node[block, label=above:{\id{i}{B0}{1..2}}] (S0B-right) {LO}
+            to ++(0:5 * \widthletter) node[epoch] (S1B-left) {\epoch{B2}}
+            to ++(0:\widthletter) node[block, fill=mydarkpurple,
+                    label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
+                ] {HELLO};
+
+
+            \draw[->, thick] (S0A-right) -- node[above, align=center]{\emph{rename to \epoch{A1}}} (S1A-left);
+            \draw[dashed, ->, thick, shorten >= 3] (S0B-right.east) -- node[below right, align=center]{\emph{insert "l" at} {\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}} (S1A-left.west);
+            \draw[->, thick] (S0B-right) -- node[below, align=center]{\emph{rename to \epoch{B2}}} (S1B-left);
+
+        \end{tikzpicture}
+        \caption{Node A and node B generating concurrent \emph{rename} operations}
+        \label{fig:revertRenameId-concurrent-rename-operations}
+    \end{subfigure}
+    \begin{subfigure}{\columnwidth}
+        \begin{tikzpicture}
+            \path
+                node {\textbf{A}}
+                to ++(0:0.5 * \widthletter) node[epoch] {\epoch{A1}}
+                to ++(0:\widthletter) node[block, fill=mydarkblue,
+                label={ [] below:{\color{mydarkblueid}\id{i}{A1}{0..1}} }
+                    ] {HE}
+                to ++(0:\widthblock) node[letter, fill=mylightblue,
+                        label={ [] above:{\color{mylightblue!20!mydarkblueid}\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}} }
+                    ] {L}
+                to ++(0:\widthletter) node[block, fill=mydarkblue,
+                        label={ [] below:{\color{mydarkblueid}\id{i}{A1}{2..3}} }
+                    ] (S1A-right) {LO}
+                to ++(0:4 * \widthletter) node[epoch] (S2A-left) {\epoch{0}}
+                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
+                to ++(0:\widthletter) node[letter, fill=mylightorange, label=below:{\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}] {L}
+                to ++(0:\widthletter) node[block, label=above:{\id{i}{B0}{1..2}}] {LO};
+
+            \path
+            to ++(270:2) node {\textbf{B}}
+            to ++(0:0.5 * \widthletter) node[epoch] {\epoch{B2}}
+            to ++(0:\widthletter) node[block, fill=mydarkpurple,
+                    label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
+                ] (S2B) {HELLO};
+
+            \draw[dotted] (S1A-right.east) -- (S2A-left.west);
+            \draw[dashed, ->, thick] (S2B.east) -- node[below right, align=center]{\emph{rename to \epoch{B2}}} (S2A-left.west);
+        \end{tikzpicture}
+        \caption{Node A reverting the effect of the \emph{rename} operation it applied upon the reception of a new \emph{primary} one}
+        \label{fig:revertRenameId-receive-primary-rename-operation}
+    \end{subfigure}
+    \begin{subfigure}{\columnwidth}
+        \begin{tikzpicture}
+            \path
+                node {\textbf{A}}
+                to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
+                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
+                to ++(0:\widthletter) node[letter, fill=mylightorange, label=below:{\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}] {L}
+                to ++(0:\widthletter) node[block, label=above:{\id{i}{B0}{1..2}}] (S2A-right) {LO}
+                to ++(0:5 * \widthletter) node[epoch] (S3A) {\epoch{B2}}
+                to ++(0:\widthletter) node[block, fill=mydarkpurple,
+                    label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
+                ] {HELLO};
+
+            \path
+            to ++(270:2) node {\textbf{B}}
+            to ++(0:0.5 * \widthletter) node[epoch] {\epoch{B2}}
+            to ++(0:\widthletter) node[block, fill=mydarkpurple,
+                    label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
+                ] (S2B) {HELLO};
+
+            \draw[->, thick] (S2A-right) -- node[above, align=center]{\emph{rename to \epoch{B2}}} (S3A);
+        \end{tikzpicture}
+        \caption{Node A then applying the \emph{primary rename} operation on its reverted state}
+    \end{subfigure}
+    \caption{Applying \emph{primary rename} operation on node \emph{A}}
+    \label{fig:revertRenameId}
+\end{figure}
+
+\mnnote{TODO: trouver comment illustrer les epochs, et notamment l'epoch courante, au niveau des représentations de la séquence répliquée de la \autoref{fig:revertRenameId}}
+
 This example describes the following scenario : in \autoref{fig:revertRenameId-concurrent-rename-operations}, node A and node B concurrently issue \emph{rename} operations.
 In \autoref{fig:revertRenameId-receive-primary-rename-operation}, node A receives node B's \emph{rename} operation.
 Upon its reception, node A compares its current epoch to the new epoch introduced.
@@ -424,100 +537,7 @@ For other identifiers such as \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, node A re
 Node A returns the tail if it fits between the identifier of its predecessor (\id{i}{B0}{0}\id{f}{A0}{0} < \id{i}{B0}{0}\id{m}{B1}{0}) and the identifier of its successor (\id{i}{B0}{0}\id{m}{B1}{0} < \id{i}{B0}{1}).
 If it does not, nodes use exclusive tuples of the renaming mechanism, $\trm{MIN\_TUPLE}$ and $\trm{MAX\_TUPLE}$, to generate an identifier complying with the intended order.
 
-\begin{figure}
-    \begin{subfigure}{\columnwidth}
-        \begin{tikzpicture}
-            \path
-                node {\textbf{A}}
-                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
-                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
-                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0A-right) {LO}
-                to ++(0:5 * \widthletter) node[block, fill=mydarkblue,
-                label={ [] below:{\color{mydarkblueid}\id{i}{A1}{0..1}} }
-                    ] (S1A-left) {HE}
-                to ++(0:\widthblock) node[letter, fill=mylightblue,
-                        label={ [] above:{\color{mylightblue!20!mydarkblueid}\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}} }
-                    ] {L}
-                to ++(0:\widthletter) node[block, fill=mydarkblue,
-                        label={ [] below:{\color{mydarkblueid}\id{i}{A1}{2..3}} }
-                    ] (S1A-right) {LO};
 
-            \path
-            to ++(270:2) node {\textbf{B}}
-            to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
-            to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
-            to ++(0:\widthletter) node[letter, fill=mylightorange, label=below:{\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}] {L}
-            to ++(0:\widthletter) node[block, label=above:{\id{i}{B0}{1..2}}] (S1B-right) {LO}
-            to ++(0:4 * \widthletter) node[block, fill=mydarkpurple,
-                    label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
-                ] (S2B) {HELLO};
-
-
-            \draw[->, thick] (S0A-right) -- node[above, align=center]{\emph{rename}} (S1A-left);
-            \draw[dashed, ->, thick, shorten >= 3] (S1B-right.east) -- node[below right, align=center]{\emph{insert "l" at} {\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}} (S1A-left.west);
-            \draw[->, thick] (S1B-right) -- node[below, align=center]{\emph{rename}} (S2B);
-
-        \end{tikzpicture}
-        \caption{Node A and node B generating concurrent \emph{rename} operations}
-        \label{fig:revertRenameId-concurrent-rename-operations}
-    \end{subfigure}
-    \begin{subfigure}{\columnwidth}
-        \begin{tikzpicture}
-            \path
-                node {\textbf{A}}
-                to ++(0:\widthletter) node[block, fill=mydarkblue,
-                label={ [] below:{\color{mydarkblueid}\id{i}{A1}{0..1}} }
-                    ] {HE}
-                to ++(0:\widthblock) node[letter, fill=mylightblue,
-                        label={ [] above:{\color{mylightblue!20!mydarkblueid}\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}} }
-                    ] {L}
-                to ++(0:\widthletter) node[block, fill=mydarkblue,
-                        label={ [] below:{\color{mydarkblueid}\id{i}{A1}{2..3}} }
-                    ] (S1A-right) {LO}
-                to ++(0:4 * \widthletter) node[letter, label=below:{\id{i}{B0}{0}}] (S2A-left) {H}
-                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
-                to ++(0:\widthletter) node[letter, fill=mylightorange, label=below:{\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}] {L}
-                to ++(0:\widthletter) node[block, label=above:{\id{i}{B0}{1..2}}] {LO};
-
-            \path
-            to ++(270:2) node {\textbf{B}}
-            to ++(0:\widthletter) node[block, fill=mydarkpurple,
-                    label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
-                ] (S2B) {HELLO};
-
-            \draw[dotted] (S1A-right.east) -- (S2A-left.west);
-            \draw[dashed, ->, thick] (S2B.east) -- node[below right, align=center]{\emph{rename}} (S2A-left.west);
-        \end{tikzpicture}
-        \caption{Node A reverting the effect of the \emph{rename} operation it applied upon the reception of a new \emph{primary} one}
-        \label{fig:revertRenameId-receive-primary-rename-operation}
-    \end{subfigure}
-    \begin{subfigure}{\columnwidth}
-        \begin{tikzpicture}
-            \path
-                node {\textbf{A}}
-                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
-                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
-                to ++(0:\widthletter) node[letter, fill=mylightorange, label=below:{\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}] {L}
-                to ++(0:\widthletter) node[block, label=above:{\id{i}{B0}{1..2}}] (S2A-right) {LO}
-                to ++(0:4 * \widthletter) node[block, fill=mydarkpurple,
-                    label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
-                ] (S3A) {HELLO};
-
-            \path
-            to ++(270:2) node {\textbf{B}}
-            to ++(0:\widthletter) node[block, fill=mydarkpurple,
-                    label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
-                ] (S2B) {HELLO};
-
-            \draw[->, thick] (S2A-right) -- node[above, align=center]{\emph{rename}} (S3A);
-        \end{tikzpicture}
-        \caption{Node A then applying the \emph{primary rename} operation on its reverted state}
-    \end{subfigure}
-    \caption{Applying \emph{primary rename} operation on node \emph{A}}
-    \label{fig:revertRenameId}
-\end{figure}
-
-\mnnote{TODO: trouver comment illustrer les epochs, et notamment l'epoch courante, au niveau des représentations de la séquence répliquée de la \autoref{fig:revertRenameId}}
 
 \subsection{Garbage collection of \emph{former states}}
 
