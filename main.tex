@@ -419,12 +419,10 @@ As $A < B$, node A deems this new epoch as the new primary one.
 To switch to this new \emph{primary} epoch, node A has to revert the effect of its \emph{rename} operation first.
 
 To this end, node A uses \autoref{alg:revertRenameId} to retrieve fitting counterparts for every identifiers of its current state.
-
-\mnnote{TODO: expliquer que l'on peut simplement inverser le renommage pour les identifiants renommés à partir de leur \emph{offset}, qui correspond en fait à leur index dans \emph{renamedIds}}
-
-\mnnote{TODO: expliquer que pour les autres identifiants, on peut revert le renommage en retournant l'identifiant tronqué de son préfixe, si cela satisfait la relation d'ordre avec les identifiants prédécesseur et successeur}
-
-\mnnote{TODO: expliquer que si ce n'est pas le cas, a recours à des tuples réservés au mécanisme de renommage, $MIN\_TUPLE$ et $MAX\_TUPLE$, pour maintenir l'ordre à travers les epochs}
+For identifiers of the form \id{i}{A1}{offset}, node A simply uses their offset to retrieve the original identifiers, as offsets correspond to the identifier indexes in \emph{renamedIds}.
+For other identifiers such as \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, node A removes its prefix (\id{i}{A1}{1}) to isolate its tail (\id{i}{B0}{0}\id{m}{B1}{0}).
+Node A returns the tail if it fits between the identifier of its predecessor (\id{i}{B0}{0}\id{f}{A0}{0} < \id{i}{B0}{0}\id{m}{B1}{0}) and the identifier of its successor (\id{i}{B0}{0}\id{m}{B1}{0} < \id{i}{B0}{1}).
+If it does not, nodes use exclusive tuples of the renaming mechanism, $\trm{MIN\_TUPLE}$ and $\trm{MAX\_TUPLE}$, to generate an identifier complying with the intended order.
 
 \begin{figure}
     \begin{subfigure}{\columnwidth}
