@@ -556,6 +556,130 @@ Once node A reverted its state to the LCA epoch (\epoch{0}) using \autoref{alg:r
     \end{enumerate}
 \end{itemize}
 
+\begin{figure}[ht!]
+    \begin{subfigure}{\columnwidth}
+        \begin{tikzpicture}
+            \path
+                node {\textbf{A}}
+                to ++(0:1) node (a0) {}
+                to ++(0:1) node[op] (a1) {$a_1$}
+                to ++(0:1) node (a2) {}
+                to ++(0:1) node (a7) {}
+                to ++(0:1) node[op] (a8) {$a_8$}
+                to ++(90:1) node {(1)}
+                to ++(0:1) node (hideTop) {}
+                to ++(270:1)
+                to ++(0:1) node[op] (a9) {$a_9$}
+                to ++(90:1) node {(2)};
+
+            \draw[->, thick] (a0) --  (a1) -- (a2);
+            \draw[dotted] (a2) -- (a7);
+            \draw[->, thick] (a7) -- (a8) -- (a9);
+
+            \path
+                to ++(270:2) node {\textbf{B}}
+                to ++(0:1) node (b0) {}
+                to ++(0:1) node[op] (b2) {$b_2$}
+                to ++(0:1) node (b3) {}
+                to ++(0:1) node (b6) {}
+                to ++(0:1) node[op] (b7) {$b_7$}
+                to ++(0:1)
+                to ++(270:1) node (hideBot) {}
+                to ++(90:1)
+                to ++(0:1) node[op] (b8) {$b_8$};
+
+            \draw[->, thick] (b0) -- (b2) -- (b3);
+            \draw[dotted] (b3) -- (b6);
+            \draw[->, thick] (b6) -- (b7) -- (b8);
+
+            \draw[->, dashed, shorten >= 3] (a1) -- (b8);
+            \draw[->, dashed, shorten >= 3] (b2) -- (a9);
+
+            \draw[dotted, thick] (hideTop) -- (hideBot);
+        \end{tikzpicture}
+        \caption{Execution}
+        \label{fig:GC-execution}
+    \end{subfigure}
+    \begin{subfigure}{\columnwidth}
+        \begin{tikzpicture}
+            \path
+                node {\textbf{A}}
+                to ++(270:1) node[op] (AeA0) {\epoch{0}}
+                to ++(225:1.5) node[op] (AeA1) {\epoch{A1}}
+                to ++(270:1.5) node[op] (AeA8) {\epoch{A8}};
+
+            \path
+                to ++(0:3) node {\textbf{B}}
+                to ++(270:1) node[op] (BeB0) {\epoch{0}}
+                to ++(315:1.5) node[op] (BeB2) {\epoch{B2}}
+                to ++(270:1.5) node[op] (BeB7) {\epoch{B7}};
+
+
+            \draw[thick] (AeA0) -- (AeA1) -- (AeA8);
+            \draw[thick] (BeB0) -- (BeB2) -- (BeB7);
+            \draw[->, dashed, thick, red] (AeA8.45) -- (AeA1.315) (AeA1.0) -- (AeA0.270);
+            \draw[->, dashed, thick, red] (BeB7.130) -- (BeB2.225) (BeB2.180) -- (BeB0.270);
+
+        \end{tikzpicture}
+        \caption{States of respective epoch trees at (1)}
+        \label{fig:GC-epoch-trees-step-1}
+    \end{subfigure}
+    \begin{subfigure}{\columnwidth}
+        \begin{tikzpicture}
+            \path
+                node {\textbf{A}}
+                to ++(270:1) node[op] (Ae0) {\epoch{0}}
+                to ++(225:1.5) node[op] (AeA1) {\epoch{A1}}
+                to ++(270:1.5) node[op] (AeA8) {\epoch{A8}};
+            \path
+                to ++(270:1)
+                to ++(315:1.5) node[causalop] (AeB2) {\epoch{B2}};
+
+            \path
+                to ++(0:4) node {\textbf{B}}
+                to ++(270:1) node[op] (Be0) {\epoch{0}}
+                to ++(315:1.5) node[op] (BeB2) {\epoch{B2}}
+                to ++(270:1.5) node[op] (BeB7) {\epoch{B7}};
+            \path
+                to ++(0:4)
+                to ++(270:1)
+                to ++(225:1.5) node[causalop] (BeA1) {\epoch{A1}};
+
+
+            \draw[thick] (Ae0) -- (AeA1) -- (AeA8) (Ae0) -- (AeB2);
+            \draw[thick] (Be0) -- (BeB2) -- (BeB7) (Be0) -- (BeA1);
+            \draw[->, dashed, thick, red] (AeB2.180) -- (AeA8.45) -- (AeA1.315) (AeA1.0) -- (Ae0.270);
+            \draw[->, dashed, thick, red] (BeB7.130) -- (BeB2.225) (BeB2.180) -- (BeA1.0) -- (Be0.270);
+
+        \end{tikzpicture}
+        \caption{States of respective epoch trees at (2)}
+        \label{fig:GC-epoch-trees-step-2}
+    \end{subfigure}
+    % \begin{subfigure}{\columnwidth}
+    %     \begin{tikzpicture}
+    %         \path
+    %             node[op] (e0) {\epoch{0}}
+    %             to ++(225:1.5) node[op] (eA1) {\epoch{A1}}
+    %             to ++(270:1.5) node[op] (eA8) {\epoch{A8}};
+
+    %         \path
+    %             to ++(315:1.5) node[op] (eB2) {\epoch{B2}}
+    %             to ++(270:1.5) node[op] (eB7) {\epoch{B7}};
+
+
+    %         \draw[thick] (e0) -- (eA1) -- (eA8);
+    %         \draw[thick] (e0) -- (eB2) -- (eB7);
+    %         \draw[dashed, thick, red] (eB7.130) -- (eB2.225) --node[yshift=7, above, align=center]{priority} (eA8.45) -- (eA1.315);
+    %         \draw[->, dashed, thick, red] (eA1.0) -- (e0.270);
+
+    %     \end{tikzpicture}
+    %     \caption{Full state of epoch trees}
+    %     \label{fig:GC-full-epoch-trees}
+    % \end{subfigure}
+    \caption{Garbage collecting epochs and corresponding \emph{former states}}
+    \label{fig:GC-epochs}
+\end{figure}
+
 \section{Evaluation}
 
 \subsection{Simulations and benchmarks}
