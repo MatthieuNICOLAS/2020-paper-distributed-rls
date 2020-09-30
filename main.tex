@@ -10,6 +10,7 @@
 
 \usepackage[inline]{enumitem} % \begin{enumerate*} \end{enumerate*}
 \usepackage{tikz} % \begin{tikzpicture} \end{tikzpicture}
+\usetikzlibrary{shapes.misc}
 
 \usepackage{graphicx}
 \usepackage{color}
@@ -52,13 +53,16 @@
 
 \newcommand{\widthletter}{7mm}
 \newcommand{\widthblock}{11mm}
+\newcommand{\widthepoch}{9.5mm}
 
 % Tikz styles
 \tikzset{
     common/.style={anchor=west, draw, rectangle, minimum height=6mm},
     letter/.style={common, minimum width=\widthletter},
     block/.style={common, minimum width=\widthblock},
-    epoch/.style={letter, dotted, minimum width=\widthletter, minimum height=6mm},
+    epoch/.style={letter, rounded rectangle, rounded rectangle east arc=0pt, minimum width=\widthepoch},
+    op/.style={draw, circle},
+    causalop/.style={op, double=white, inner sep=2pt},
     cross/.style={
         path picture={
             \draw[mydarkred, very thick]
