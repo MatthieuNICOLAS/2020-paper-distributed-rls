@@ -8,6 +8,10 @@
 \usepackage{algpseudocode} % \begin{algorithmic} \end{algorithmic}
 \algnewcommand{\LeftComment}[1]{$\triangleright$ #1}
 
+\usepackage{amsthm} % \newtheorem
+\newtheorem{myrule}{Rule}
+\def\myruleautorefname{Rule} % \autoref
+
 \usepackage[inline]{enumitem} % \begin{enumerate*} \end{enumerate*}
 \usepackage{tikz} % \begin{tikzpicture} \end{tikzpicture}
 \usetikzlibrary{shapes.misc}
@@ -364,6 +368,7 @@ In order to switch to the new \emph{primary} epoch, nodes first revert the effec
 To establish which operations to revert, nodes identify the \ac{LCA} of their current epoch and of the new \emph{primary} one.
 
 \subsection{Reverting \emph{rename} operations}
+\label{sec:reverting-rename-op}
 
 Nodes have to revert \emph{rename} operations applied since the \ac{LCA} epoch between their current epoch and the new primary one, in the reverse order.
 To do so, nodes use \autoref{alg:revertRenameId}.
@@ -546,15 +551,48 @@ Once node A reverted its state to the LCA epoch (\epoch{0}) using \autoref{alg:r
 
 \subsection{Garbage collection of \emph{former states}}
 
-\begin{itemize}
-    \item Nodes have to store epochs and corresponding \emph{former states} to transform operations from concurrent or previous epochs to the current one
-    \item Epochs and \emph{former states} can thus be garbage collected once they are not needed anymore
-    \item An epoch can be safely garbage collected once
-    \begin{enumerate}
-        \item The given epoch $e$ is a leaf and a concurrent and primary epoch $e'$ is causally stable
-        \item The given epoch $e$ is the root of the epoch tree, has only one child $e'$ and $e'$ is causally stable
-    \end{enumerate}
-\end{itemize}
+% \begin{itemize}
+%     \item Nodes have to store epochs and corresponding \emph{former states} to transform operations from concurrent or previous epochs to the current one
+%     \item Epochs and \emph{former states} can thus be garbage collected once they are not needed anymore
+%     \item An epoch can be safely garbage collected once
+%     \begin{enumerate}
+%         \item The given epoch $e$ is a leaf and a concurrent and primary epoch $e'$ is causally stable
+%         \item The given epoch $e$ is the root of the epoch tree, has only one child $e'$ and $e'$ is causally stable
+%     \end{enumerate}
+% \end{itemize}
+
+As explained in \cite{nicolas:hal-02526724} and \autoref{sec:reverting-rename-op}, nodes have to store epochs and corresponding \emph{former states} to transform operations from previous or concurrent epochs to the current one, or to rename their state to switch to a new \emph{primary} epoch.
+However, once nodes become aware that some epochs can not possibly be required anymore to apply future operations, they can garbage collect these epochs and their corresponding \emph{rename} operations.
+We propose the two following rules to enable nodes to identify unnecessary epochs :
+
+\begin{myrule}
+    \label{rule:gc-concurrent-primary-epoch}
+    An epoch \epoch{} can be garbage collected if \epoch{} is a leaf of the epoch tree and a concurrent primary epoch \epoch{}' is causally stable.
+\end{myrule}
+
+\begin{myrule}
+    \label{rule:gc-root}
+    An epoch \epoch{} can be garbage collected if \epoch{} is the root of the epoch tree, has only one child \epoch{}' and that \epoch{}' is causally stable.
+\end{myrule}
+
+\autoref{fig:GC-epochs} illustrates a use case of \autoref{rule:gc-concurrent-primary-epoch} and \autoref{rule:gc-root}.
+In \autoref{fig:GC-execution}, we represent an execution in which two nodes A and B respectively issue two \emph{rename} operation before eventually synchronising.
+In \autoref{fig:GC-epoch-trees-step-1}, we represent the states of their respective \emph{epoch trees} once they each generate their \emph{rename} operations.
+In \autoref{fig:GC-epoch-trees-step-2}, we represent the new states of their \emph{epoch trees} once they each receive the first \emph{rename} operation issued by the other node.
+
+Upon the delivery of the \emph{rename} operation introducing epoch \epoch{B2} to node A, \epoch{B2} becomes causally stable.
+From this point, node A knows that every node switched to this epoch at least.
+Therefore nodes can no longer issue operations from \epoch{e0}, \epoch{A1} or \epoch{A8}.
+Thus these epochs and the \emph{rename} operations enabling nodes to switch between them can now be garbage collected.
+\autoref{rule:gc-concurrent-primary-epoch} enables node A to garbage collect epochs \epoch{A8} then \epoch{A1}.
+Then \autoref{rule:gc-root} enables node A to garbage collect \epoch{0} and the \emph{renaming} operation to switch to \epoch{B2}.
+
+On the other hand, node B can not garbage collect any epochs despite \epoch{A1} being causally stable.
+Indeed, from its point of view, other nodes may still issue operations from epoch \epoch{A1}.
+Since in that case node B would have to transform operations to apply them to \epoch{B7}, node B has to retain \epoch{A1} and its corresponding \emph{rename} operation.
+
+Eventually, once the system becomes idle, the current \emph{primary} epoch will become causally stable.
+Nodes will then be able to garbage collect all other epochs using \autoref{rule:gc-concurrent-primary-epoch} and \autoref{rule:gc-root}, effectively suppressing the overhead of the renaming mechanism.
 
 \begin{figure}[ht!]
     \begin{subfigure}{\columnwidth}
@@ -655,30 +693,11 @@ Once node A reverted its state to the LCA epoch (\epoch{0}) using \autoref{alg:r
         \caption{States of respective epoch trees at (2)}
         \label{fig:GC-epoch-trees-step-2}
     \end{subfigure}
-    % \begin{subfigure}{\columnwidth}
-    %     \begin{tikzpicture}
-    %         \path
-    %             node[op] (e0) {\epoch{0}}
-    %             to ++(225:1.5) node[op] (eA1) {\epoch{A1}}
-    %             to ++(270:1.5) node[op] (eA8) {\epoch{A8}};
-
-    %         \path
-    %             to ++(315:1.5) node[op] (eB2) {\epoch{B2}}
-    %             to ++(270:1.5) node[op] (eB7) {\epoch{B7}};
-
-
-    %         \draw[thick] (e0) -- (eA1) -- (eA8);
-    %         \draw[thick] (e0) -- (eB2) -- (eB7);
-    %         \draw[dashed, thick, red] (eB7.130) -- (eB2.225) --node[yshift=7, above, align=center]{priority} (eA8.45) -- (eA1.315);
-    %         \draw[->, dashed, thick, red] (eA1.0) -- (e0.270);
-
-    %     \end{tikzpicture}
-    %     \caption{Full state of epoch trees}
-    %     \label{fig:GC-full-epoch-trees}
-    % \end{subfigure}
     \caption{Garbage collecting epochs and corresponding \emph{former states}}
     \label{fig:GC-epochs}
 \end{figure}
+
+\mnnote{TODO: Marquer comme GC \epoch{A1} et \epoch{A8} via \autoref{rule:gc-concurrent-primary-epoch} et \epoch{0} via \autoref{rule:gc-root} de l'epoch tree de A dans la \autoref{fig:GC-epoch-trees-step-2}}
 
 \section{Evaluation}
 
