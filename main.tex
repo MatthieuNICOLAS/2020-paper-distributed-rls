@@ -173,6 +173,96 @@ We describe the behavior of the mechanism in \autoref{sec:renamablelogootsplit}.
 
 \subsection{\emph{rename} operation}
 
+To enable nodes to reassign shorter identifiers to elements and to aggregate them into fewer blocks, RenamableLogootSplit has a \emph{rename} operation.
+We present in \autoref{fig:renaming} an example of its behavior.
+
+\begin{figure}[ht!]
+    \begin{subfigure}{\columnwidth}
+        \centering
+        \begin{tikzpicture}
+            \path
+                node {\textbf{A}}
+                to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
+                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
+                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0A-right) {LO}
+                to ++(0:5 * \widthletter) node[epoch] (S1A-left) {\epoch{A1}}
+                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0}}] {H};
+
+            \draw[->, thick] (S0A-right) -- node[below, align=center]{\emph{rename to \epoch{A1}}} (S1A-left);
+        \end{tikzpicture}
+        \caption{Selecting the new identifier of the first element}
+        \label{fig:renaming-first-id}
+    \end{subfigure}
+    \begin{subfigure}{\columnwidth}
+        \centering
+        \begin{tikzpicture}
+            \path
+                node {\textbf{A}}
+                to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
+                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
+                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0A-right) {LO}
+                to ++(0:5 * \widthletter) node[epoch] (S1A-left) {\epoch{A1}}
+                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0}}] {H}
+                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{1}}] {E}
+                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{2}}] {L}
+                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{3}}] {0};
+
+                \draw[->, thick] (S0A-right) -- node[below, align=center]{\emph{rename to \epoch{A1}}} (S1A-left);
+            \end{tikzpicture}
+            \caption{Selecting the new identifiers of the remaining ones}
+        \label{fig:renaming-second-id}
+    \end{subfigure}
+    \begin{subfigure}{\columnwidth}
+        \centering
+        \begin{tikzpicture}
+            \path
+                node {\textbf{A}}
+                to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
+                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
+                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0A-right) {LO}
+                to ++(0:5 * \widthletter) node[epoch] (S1A-left) {\epoch{A1}}
+                to ++(0:\widthletter) node[block, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0..3}}] {HELO};
+
+            \draw[->, thick] (S0A-right) -- node[below, align=center]{\emph{rename to \epoch{A1}}} (S1A-left);
+        \end{tikzpicture}
+        \caption{Final state obtained}
+        \label{fig:renaming-final-state}
+    \end{subfigure}
+    \caption{Renaming the sequence on node \emph{A}}
+    \label{fig:renaming}
+\end{figure}
+
+In this example, node A performs a renaming on its current state.
+As illustrated in \autoref{fig:renaming-first-id}, Node A first proceeds to assign a new identifier to the first element of the sequence (H).
+It generates this new identifier (\id{i}{A1}{0}) by reusing the position of the current first identifier ($i$) and using its own node id (\textbf{A}) and current sequence number (\emph{1}).
+The offset of this new identifier is set to 0.
+
+Then node A derives identifiers for all remaining elements by successively incrementing the offset (\id{i}{A1}{1}, \id{i}{A1}{2} and \id{i}{A1}{3}), as shown in \autoref{fig:renaming-second-id}.
+Since resulting identifiers are consecutive, elements can be aggregated into one block as illustrated in \autoref{fig:renaming-final-state}.
+It enables the \emph{rename} operation to effectively minimize the memory overhead of the resulting replicated sequence.
+
+\mnnote{TODO: Expliquer qu'effectuer un renommage est analogue à effectuer un changement de repère.}
+To denotes frames of reference, we use \emph{epochs}.
+Initally, the replicated sequence starts at the \emph{origin} epoch noted \epoch{0}.
+Each \emph{rename} operations introduces a new epoch and enables the sequence to advance to it from the previous one.
+The generated epoch is characterized using the node id and its current sequence number upon the generation of the \emph{rename} operation.
+For example, the \emph{rename} operation described in \autoref{fig:renaming} enables node A to advance its state from \epoch{0} to \epoch{A1}.
+
+Nodes tag every operation with their current epoch at the time the operation is generated.
+Upon the reception of \emph{insert} and \emph{remove} operations from former epochs, nodes can not naively apply them to their states at it would lead to inconsistencies.
+Beforehand, nodes have to transform the operations against the effect of concurrently applied \emph{rename} operations.
+
+To this end, nodes use \autoref{alg:renameId}.
+This algorithm maps identifiers from the previous epoch to corresponding ones in the new epoch.
+To this end, this algorithm relies on the \emph{former state}, the element identifiers of the state upon which the \emph{rename} operation was generated.
+More details about the transformation of concurrent \emph{insert} and \emph{remove} operations against \emph{rename} operations can be found in \cite{nicolas:hal-02526724}.
+
+Nodes also use \autoref{alg:renameId} to apply \emph{rename} operations issued by others.
+It thus requires to propagate \emph{former states} by embedding them into their respective \emph{rename} operations.
+
 \begin{algorithm}
     \caption{Rename identifier}
     \label{alg:renameId}
@@ -231,78 +321,6 @@ We describe the behavior of the mechanism in \autoref{sec:renamablelogootsplit}.
     \EndFunction
     \end{algorithmic}
 \end{algorithm}
-
-% \begin{itemize}
-%     \item May encounter concurrent \emph{rename} operations in this setting
-%     \item The \emph{rename} operation is not commutative with itself
-%     \item Deal with a conflict in case of concurrent \emph{rename} operations
-%     \item No user intention attached to \emph{rename} operations, operations behind the scene
-%     \item Can actually solve the conflict by arbitrary deciding with which operation to continue
-%     \begin{itemize}
-%         \item Call the operation with which nodes continue the \emph{winning} one \mnnote{TODO: trouver un meilleur terme, "primary" ?}
-%         \item Call the others the \emph{losing} ones \mnnote{TODO: trouver un meilleur terme, "secondary" ?}
-%     \end{itemize}
-% \end{itemize}
-
-\mnnote{TODO: décrire le comportement de l'opération de renommage}
-
-\begin{figure}[ht!]
-    \begin{subfigure}{\columnwidth}
-        \begin{tikzpicture}
-            \path
-                node {\textbf{A}}
-                to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
-                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
-                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
-                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0A-right) {LO}
-                to ++(0:5 * \widthletter) node[epoch] (S1A-left) {\epoch{A1}}
-                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0}}] {H};
-
-            \draw[->, thick] (S0A-right) -- node[below, align=center]{\emph{rename to \epoch{A1}}} (S1A-left);
-        \end{tikzpicture}
-        \caption{Selecting the new identifier of the first element}
-        \label{fig:renaming-first-id}
-    \end{subfigure}
-    \begin{subfigure}{\columnwidth}
-        \begin{tikzpicture}
-            \path
-                node {\textbf{A}}
-                to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
-                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
-                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
-                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0A-right) {LO}
-                to ++(0:5 * \widthletter) node[epoch] (S1A-left) {\epoch{A1}}
-                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0}}] {H}
-                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{1}}] {E}
-                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{2}}] {L}
-                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{3}}] {0};
-
-                \draw[->, thick] (S0A-right) -- node[below, align=center]{\emph{rename to \epoch{A1}}} (S1A-left);
-            \end{tikzpicture}
-            \caption{Selecting the new identifiers of the remaining ones}
-        \label{fig:renaming-second-id}
-    \end{subfigure}
-    \begin{subfigure}{\columnwidth}
-        \begin{tikzpicture}
-            \path
-                node {\textbf{A}}
-                to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
-                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
-                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
-                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0A-right) {LO}
-                to ++(0:5 * \widthletter) node[epoch] (S1A-left) {\epoch{A1}}
-                to ++(0:\widthletter) node[block, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0..3}}] {HELO};
-
-            \draw[->, thick] (S0A-right) -- node[below, align=center]{\emph{rename to \epoch{A1}}} (S1A-left);
-        \end{tikzpicture}
-        \caption{Final state obtained}
-        \label{fig:renaming-final-state}
-    \end{subfigure}
-    \caption{Renaming the sequence on node \emph{A}}
-    \label{fig:renaming}
-\end{figure}
-
-\mnnote{TODO: diriger le lecteur vers le papier pour PaPoC pour la gestion des opés "simples" concurrentes}
 
 As no coordination is enforced between nodes, several of them may concurrently rename their respective states.
 However, the proposed \emph{rename} operation is not commutative with itself.
@@ -431,6 +449,7 @@ The \autoref{fig:revertRenameId} illustrates an example of its usage.
 
 \begin{figure}[ht!]
     \begin{subfigure}{\columnwidth}
+        \centering
         \begin{tikzpicture}
             \path
                 node {\textbf{A}}
@@ -471,6 +490,7 @@ The \autoref{fig:revertRenameId} illustrates an example of its usage.
         \label{fig:revertRenameId-concurrent-rename-operations}
     \end{subfigure}
     \begin{subfigure}{\columnwidth}
+        \centering
         \begin{tikzpicture}
             \path
                 node {\textbf{A}}
@@ -504,6 +524,7 @@ The \autoref{fig:revertRenameId} illustrates an example of its usage.
         \label{fig:revertRenameId-receive-primary-rename-operation}
     \end{subfigure}
     \begin{subfigure}{\columnwidth}
+        \centering
         \begin{tikzpicture}
             \path
                 node {\textbf{A}}
@@ -532,8 +553,6 @@ The \autoref{fig:revertRenameId} illustrates an example of its usage.
     \caption{Applying \emph{primary rename} operation on node \emph{A}}
     \label{fig:revertRenameId}
 \end{figure}
-
-\mnnote{TODO: trouver comment illustrer les epochs, et notamment l'epoch courante, au niveau des représentations de la séquence répliquée de la \autoref{fig:revertRenameId}}
 
 This example describes the following scenario : in \autoref{fig:revertRenameId-concurrent-rename-operations}, node A and node B concurrently issue \emph{rename} operations.
 In \autoref{fig:revertRenameId-receive-primary-rename-operation}, node A receives node B's \emph{rename} operation.
@@ -596,6 +615,7 @@ Nodes will then be able to garbage collect all other epochs using \autoref{rule:
 
 \begin{figure}[ht!]
     \begin{subfigure}{\columnwidth}
+        \centering
         \begin{tikzpicture}
             \path
                 node {\textbf{A}}
@@ -639,6 +659,7 @@ Nodes will then be able to garbage collect all other epochs using \autoref{rule:
         \label{fig:GC-execution}
     \end{subfigure}
     \begin{subfigure}{\columnwidth}
+        \centering
         \begin{tikzpicture}
             \path
                 node {\textbf{A}}
@@ -663,6 +684,7 @@ Nodes will then be able to garbage collect all other epochs using \autoref{rule:
         \label{fig:GC-epoch-trees-step-1}
     \end{subfigure}
     \begin{subfigure}{\columnwidth}
+        \centering
         \begin{tikzpicture}
             \path
                 node {\textbf{A}}
