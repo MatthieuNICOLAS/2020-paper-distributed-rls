@@ -55,9 +55,10 @@
 \newcommand{\id}[3]{$\trm{#1}^{\trm{#2}}_{\trm{#3}}$}
 \newcommand{\epoch}[1]{$\varepsilon_{#1}$}
 
-\newcommand{\widthletter}{7mm}
-\newcommand{\widthblock}{11mm}
-\newcommand{\widthepoch}{9.5mm}
+\newcommand{\widthletter}{2em}
+\newcommand{\widthblock}{3em}
+\newcommand{\widthoriginepoch}{1.65em}
+\newcommand{\widthepoch}{1.8em}
 
 % Tikz styles
 \tikzset{
@@ -183,11 +184,11 @@ We present in \autoref{fig:renaming} an example of its behavior.
             \path
                 node {\textbf{A}}
                 to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
-                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                to ++(0:\widthoriginepoch) node[letter, label=below:{\id{i}{B0}{0}}] {H}
                 to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
                 to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0A-right) {LO}
                 to ++(0:5 * \widthletter) node[epoch] (S1A-left) {\epoch{A1}}
-                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0}}] {H};
+                to ++(0:\widthepoch) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0}}] {H};
 
             \draw[->, thick] (S0A-right) -- node[below, align=center]{\emph{rename to \epoch{A1}}} (S1A-left);
         \end{tikzpicture}
@@ -196,15 +197,15 @@ We present in \autoref{fig:renaming} an example of its behavior.
     \end{subfigure}
     \begin{subfigure}{\columnwidth}
         \centering
-        \begin{tikzpicture}
+        \begin{tikzpicture}[scale=0.9, every node/.style={scale=0.9}]
             \path
                 node {\textbf{A}}
                 to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
-                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                to ++(0:\widthoriginepoch) node[letter, label=below:{\id{i}{B0}{0}}] {H}
                 to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
                 to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0A-right) {LO}
                 to ++(0:5 * \widthletter) node[epoch] (S1A-left) {\epoch{A1}}
-                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0}}] {H}
+                to ++(0:\widthepoch) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0}}] {H}
                 to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{1}}] {E}
                 to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{2}}] {L}
                 to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{3}}] {0};
@@ -220,11 +221,11 @@ We present in \autoref{fig:renaming} an example of its behavior.
             \path
                 node {\textbf{A}}
                 to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
-                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                to ++(0:\widthoriginepoch) node[letter, label=below:{\id{i}{B0}{0}}] {H}
                 to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
                 to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0A-right) {LO}
                 to ++(0:5 * \widthletter) node[epoch] (S1A-left) {\epoch{A1}}
-                to ++(0:\widthletter) node[block, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0..3}}] {HELO};
+                to ++(0:\widthepoch) node[block, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0..3}}] {HELO};
 
             \draw[->, thick] (S0A-right) -- node[below, align=center]{\emph{rename to \epoch{A1}}} (S1A-left);
         \end{tikzpicture}
@@ -247,9 +248,9 @@ It enables the \emph{rename} operation to effectively minimize the memory overhe
 \mnnote{TODO: Expliquer qu'effectuer un renommage est analogue à effectuer un changement de repère.}
 To denotes frames of reference, we use \emph{epochs}.
 Initally, the replicated sequence starts at the \emph{origin} epoch noted \epoch{0}.
-Each \emph{rename} operations introduces a new epoch and enables the sequence to advance to it from the previous one.
+Each \emph{rename} operations introduces a new epoch and enables nodes to advance their states to it from the previous epoch.
 The generated epoch is characterized using the node id and its current sequence number upon the generation of the \emph{rename} operation.
-For example, the \emph{rename} operation described in \autoref{fig:renaming} enables node A to advance its state from \epoch{0} to \epoch{A1}.
+For example, the \emph{rename} operation described in \autoref{fig:renaming} enables nodes to advance their states from \epoch{0} to \epoch{A1}.
 
 Nodes tag every operation with their current epoch at the time the operation is generated.
 Upon the reception of \emph{insert} and \emph{remove} operations from former epochs, nodes can not naively apply them to their states at it would lead to inconsistencies.
@@ -257,7 +258,7 @@ Beforehand, nodes have to transform the operations against the effect of concurr
 
 To this end, nodes use \autoref{alg:renameId}.
 This algorithm maps identifiers from the previous epoch to corresponding ones in the new epoch.
-To this end, this algorithm relies on the \emph{former state}, the element identifiers of the state upon which the \emph{rename} operation was generated.
+To do so, this algorithm relies on the \emph{former state}, the element identifiers of the state upon which the \emph{rename} operation was generated.
 More details about the transformation of concurrent \emph{insert} and \emph{remove} operations against \emph{rename} operations can be found in \cite{nicolas:hal-02526724}.
 
 Nodes also use \autoref{alg:renameId} to apply \emph{rename} operations issued by others.
@@ -322,7 +323,7 @@ It thus requires to propagate \emph{former states} by embedding them into their 
     \end{algorithmic}
 \end{algorithm}
 
-As no coordination is enforced between nodes, several of them may concurrently rename their respective states.
+Furthermore, as no coordination is enforced between nodes, several of them may also concurrently rename their respective states.
 However, the proposed \emph{rename} operation is not commutative with itself.
 Applying concurrent \emph{rename} operations in different orders to nodes, according to the order in which they each receive the operations, would result in diverging states.
 Nodes therefore encounter a conflict when dealing with several \emph{rename} operations concurrently issued.
@@ -450,15 +451,15 @@ The \autoref{fig:revertRenameId} illustrates an example of its usage.
 \begin{figure}[ht!]
     \begin{subfigure}{\columnwidth}
         \centering
-        \begin{tikzpicture}
+        \begin{tikzpicture}[scale=0.9, every node/.style={scale=0.9}]
             \path
                 node {\textbf{A}}
                 to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
-                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                to ++(0:\widthoriginepoch) node[letter, label=below:{\id{i}{B0}{0}}] {H}
                 to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
                 to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0A-right) {LO}
                 to ++(0:5 * \widthletter) node[epoch] (S1A-left)  {\epoch{A1}}
-                to ++(0:\widthletter) node[block, fill=mydarkblue,
+                to ++(0:\widthepoch) node[block, fill=mydarkblue,
                 label={below:{\color{mydarkblueid}\id{i}{A1}{0..1}} }
                     ]{HE}
                 to ++(0:\widthblock) node[letter, fill=mylightblue,
@@ -471,12 +472,12 @@ The \autoref{fig:revertRenameId} illustrates an example of its usage.
             \path
             to ++(270:2) node {\textbf{B}}
             to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
-            to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+            to ++(0:\widthoriginepoch) node[letter, label=below:{\id{i}{B0}{0}}] {H}
             to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
             to ++(0:\widthletter) node[letter, fill=mylightorange, label=below:{\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}] {L}
             to ++(0:\widthletter) node[block, label=above:{\id{i}{B0}{1..2}}] (S0B-right) {LO}
             to ++(0:5 * \widthletter) node[epoch] (S1B-left) {\epoch{B2}}
-            to ++(0:\widthletter) node[block, fill=mydarkpurple,
+            to ++(0:\widthepoch) node[block, fill=mydarkpurple,
                     label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
                 ] {HELLO};
 
@@ -491,7 +492,7 @@ The \autoref{fig:revertRenameId} illustrates an example of its usage.
     \end{subfigure}
     \begin{subfigure}{\columnwidth}
         \centering
-        \begin{tikzpicture}
+        \begin{tikzpicture}[scale=0.9, every node/.style={scale=0.9}]
             \path
                 node {\textbf{A}}
                 to ++(0:0.5 * \widthletter) node[epoch] {\epoch{A1}}
@@ -505,7 +506,7 @@ The \autoref{fig:revertRenameId} illustrates an example of its usage.
                         label={ [] below:{\color{mydarkblueid}\id{i}{A1}{2..3}} }
                     ] (S1A-right) {LO}
                 to ++(0:4 * \widthletter) node[epoch] (S2A-left) {\epoch{0}}
-                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                to ++(0:\widthoriginepoch) node[letter, label=below:{\id{i}{B0}{0}}] {H}
                 to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
                 to ++(0:\widthletter) node[letter, fill=mylightorange, label=below:{\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}] {L}
                 to ++(0:\widthletter) node[block, label=above:{\id{i}{B0}{1..2}}] {LO};
@@ -513,7 +514,7 @@ The \autoref{fig:revertRenameId} illustrates an example of its usage.
             \path
             to ++(270:2) node {\textbf{B}}
             to ++(0:0.5 * \widthletter) node[epoch] {\epoch{B2}}
-            to ++(0:\widthletter) node[block, fill=mydarkpurple,
+            to ++(0:\widthepoch) node[block, fill=mydarkpurple,
                     label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
                 ] (S2B) {HELLO};
 
@@ -529,19 +530,19 @@ The \autoref{fig:revertRenameId} illustrates an example of its usage.
             \path
                 node {\textbf{A}}
                 to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
-                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                to ++(0:\widthoriginepoch) node[letter, label=below:{\id{i}{B0}{0}}] {H}
                 to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
                 to ++(0:\widthletter) node[letter, fill=mylightorange, label=below:{\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}] {L}
                 to ++(0:\widthletter) node[block, label=above:{\id{i}{B0}{1..2}}] (S2A-right) {LO}
                 to ++(0:5 * \widthletter) node[epoch] (S3A) {\epoch{B2}}
-                to ++(0:\widthletter) node[block, fill=mydarkpurple,
+                to ++(0:\widthepoch) node[block, fill=mydarkpurple,
                     label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
                 ] {HELLO};
 
             \path
             to ++(270:2) node {\textbf{B}}
             to ++(0:0.5 * \widthletter) node[epoch] {\epoch{B2}}
-            to ++(0:\widthletter) node[block, fill=mydarkpurple,
+            to ++(0:\widthepoch) node[block, fill=mydarkpurple,
                     label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
                 ] (S2B) {HELLO};
 
