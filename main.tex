@@ -563,10 +563,10 @@ As $A < B$, node A deems \epoch{B2} as the new \emph{primary} one.
 To switch to this new \emph{primary} epoch, node A has to revert the effect of its \emph{rename} operation first.
 
 To this end, node A uses \autoref{alg:revertRenameId} to retrieve fitting counterparts for every identifiers of its current state.
-For identifiers of the form \id{i}{A1}{offset}, node A simply uses their offset to retrieve the original identifiers, as offsets correspond to the identifier indexes in \emph{renamedIds}.
-For other identifiers such as \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, node A removes its prefix (\id{i}{A1}{1}) to isolate its tail (\id{i}{B0}{0}\id{m}{B1}{0}).
-Node A returns the tail if it fits between the identifier of its predecessor (\id{i}{B0}{0}\id{f}{A0}{0} < \id{i}{B0}{0}\id{m}{B1}{0}) and the identifier of its successor (\id{i}{B0}{0}\id{m}{B1}{0} < \id{i}{B0}{1}).
-If it does not, nodes use exclusive tuples of the renaming mechanism, $\trm{MIN\_TUPLE}$ and $\trm{MAX\_TUPLE}$, to generate an identifier complying with the intended order.
+For identifiers of the form \id{i}{A1}{offset}, it simply uses their offset to retrieve the original identifiers, as offsets correspond to the identifier indexes in \emph{renamedIds}.
+For other identifiers such as \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, \autoref{alg:revertRenameId} removes its prefix (\id{i}{A1}{1}) to isolate its tail (\id{i}{B0}{0}\id{m}{B1}{0}).
+The algorithm returns the tail if it fits between the identifier of its predecessor (\id{i}{B0}{0}\id{f}{A0}{0} < \id{i}{B0}{0}\id{m}{B1}{0}) and the identifier of its successor (\id{i}{B0}{0}\id{m}{B1}{0} < \id{i}{B0}{1}).
+If it would not, \autoref{alg:revertRenameId} would use exclusive tuples of the renaming mechanism, $\trm{MIN\_TUPLE}$ and $\trm{MAX\_TUPLE}$, to generate an identifier complying with the intended order.
 
 Once node A reverted its state to the LCA epoch (\epoch{0}) using \autoref{alg:revertRenameId}, it can successively apply \emph{rename} operations leading to the new \emph{primary} epoch (\epoch{B2}) using \autoref{alg:renameId}, as illustrated in \autoref{fig:revertRenameId-apply-rename}.
 
