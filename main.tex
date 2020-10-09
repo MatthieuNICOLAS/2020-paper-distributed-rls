@@ -66,7 +66,7 @@
     letter/.style={common, minimum width=\widthletter},
     block/.style={common, minimum width=\widthblock},
     epoch/.style={letter, rounded rectangle, rounded rectangle east arc=0pt, minimum width=\widthepoch},
-    op/.style={draw, circle},
+    op/.style={draw, circle, minimum size=2em},
     causalop/.style={op, double=white, inner sep=2pt},
     cross/.style={
         path picture={
@@ -664,13 +664,13 @@ Nodes will then be able to garbage collect all other epochs using \autoref{rule:
         \begin{tikzpicture}
             \path
                 node {\textbf{A}}
-                to ++(270:1) node[op] (AeA0) {\epoch{0}}
+                to ++(270:1) node[causalop] (AeA0) {\epoch{0}}
                 to ++(225:1.5) node[op] (AeA1) {\epoch{A1}}
                 to ++(270:1.5) node[op] (AeA8) {\epoch{A8}};
 
             \path
                 to ++(0:3) node {\textbf{B}}
-                to ++(270:1) node[op] (BeB0) {\epoch{0}}
+                to ++(270:1) node[causalop] (BeB0) {\epoch{0}}
                 to ++(315:1.5) node[op] (BeB2) {\epoch{B2}}
                 to ++(270:1.5) node[op] (BeB7) {\epoch{B7}};
 
@@ -689,7 +689,7 @@ Nodes will then be able to garbage collect all other epochs using \autoref{rule:
         \begin{tikzpicture}
             \path
                 node {\textbf{A}}
-                to ++(270:1) node[op] (Ae0) {\epoch{0}}
+                to ++(270:1) node[causalop] (Ae0) {\epoch{0}}
                 to ++(225:1.5) node[op] (AeA1) {\epoch{A1}}
                 to ++(270:1.5) node[op] (AeA8) {\epoch{A8}};
             \path
@@ -698,7 +698,7 @@ Nodes will then be able to garbage collect all other epochs using \autoref{rule:
 
             \path
                 to ++(0:4) node {\textbf{B}}
-                to ++(270:1) node[op] (Be0) {\epoch{0}}
+                to ++(270:1) node[causalop] (Be0) {\epoch{0}}
                 to ++(315:1.5) node[op] (BeB2) {\epoch{B2}}
                 to ++(270:1.5) node[op] (BeB7) {\epoch{B7}};
             \path
