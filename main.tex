@@ -245,8 +245,9 @@ Then node A derives identifiers for all remaining elements by successively incre
 Since resulting identifiers are consecutive, elements can be aggregated into one block as illustrated in \autoref{fig:renaming-final-state}.
 It enables the \emph{rename} operation to effectively minimize the memory overhead of the resulting replicated sequence.
 
-\mnnote{TODO: Expliquer qu'effectuer un renommage est analogue à effectuer un changement de repère.}
-To denotes frames of reference, we use \emph{epochs}.
+Identifiers are used to position elements relatively to each others.
+Since the \emph{rename} operation enables to reassign identifiers to elements, this operation can be considered as a change of reference frames.
+To denotes different frames of reference, we use \emph{epochs}.
 Initally, the replicated sequence starts at the \emph{origin} epoch noted \epoch{0}.
 Each \emph{rename} operations introduces a new epoch and enables nodes to advance their states to it from the previous epoch.
 The generated epoch is characterized using the node id and its current sequence number upon the generation of the \emph{rename} operation.
@@ -598,7 +599,7 @@ We propose the two following rules to enable nodes to identify unnecessary epoch
 \autoref{fig:GC-epochs} illustrates a use case of \autoref{rule:gc-concurrent-primary-epoch} and \autoref{rule:gc-root}.
 In \autoref{fig:GC-execution}, we represent an execution in which two nodes A and B respectively issue two \emph{rename} operation before eventually synchronising.
 In \autoref{fig:GC-epoch-trees-step-1}, we represent the states of their respective \emph{epoch trees} once they each generate their \emph{rename} operations.
-In \autoref{fig:GC-epoch-trees-step-2}, we represent the new states of their \emph{epoch trees} once they each receive the first \emph{rename} operation issued by the other node.
+In \autoref{fig:GC-epoch-trees-step-2}, we represent the new states of their \emph{epoch trees} once they each receive the first \emph{rename} operation issued by each other.
 
 Upon the delivery of the \emph{rename} operation introducing epoch \epoch{B2} to node A, \epoch{B2} becomes causally stable.
 From this point, node A knows that every node switched to this epoch at least.
@@ -609,7 +610,7 @@ Then \autoref{rule:gc-root} enables node A to garbage collect \epoch{0} and the 
 
 On the other hand, node B can not garbage collect any epochs despite \epoch{A1} being causally stable.
 Indeed, from its point of view, other nodes may still issue operations from epoch \epoch{A1}.
-Since in that case node B would have to transform operations to apply them to \epoch{B7}, node B has to retain \epoch{A1} and its corresponding \emph{rename} operation.
+Since in that case node B would have to transform operations to apply them to \epoch{B7}, node B has to retain all epochs forming the path between \epoch{A1} and \epoch{B7} and their corresponding \emph{rename} operations.
 
 Eventually, once the system becomes idle, the current \emph{primary} epoch will become causally stable.
 Nodes will then be able to garbage collect all other epochs using \autoref{rule:gc-concurrent-primary-epoch} and \autoref{rule:gc-root}, effectively suppressing the overhead of the renaming mechanism.
