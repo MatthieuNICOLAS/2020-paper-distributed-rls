@@ -727,7 +727,41 @@ Nodes will then be able to garbage collect all other epochs using \autoref{rule:
 
 \subsection{Simulations and benchmarks}
 
-\mnnote{TODO: Reprendre la description du scénario et de l'implémentation des benchmarks de PaPoC, en modifiant seulement la partie concernant le bot qui effectue le renommage pour expliquer ici qu'on fait varier \emph{nbRenamingBots} en fonction de la simulation}
+In order to validate the proposed approach, we proceed to an experimental evaluation.
+The aims of this evaluation are to measure
+\begin{enumerate*}[label=(\roman*)]
+    \item the memory overhead of the replicated sequence
+    \item the computational overhead added to \emph{insert} and \emph{remove} operations by the renaming mechanism
+    \item the cost of integrating \emph{rename} operations.
+\end{enumerate*}
+
+Unfortunately, we were not able to retrieve an existing dataset of real-time collaborative editing sessions.
+We thus setup simulations to generate the dataset on which run our benchmarks.
+These simulations mimic the scenario below.
+
+Several authors collaboratively write an article in real-time.
+First of all, the authors mainly specify the content of the article.
+Few \emph{remove} operations are issued in order to simulate spelling mistakes.
+Once the document reaches a arbitrary given critical length, collaborators move on to the second phase of the simulation.
+During this second phase, authors stop adding new content but instead focus on revamping existing parts.
+This is simulated by balancing the ratio between \emph{insert} and \emph{remove} operations.
+Every author has to issue a given number of \emph{insert} and \emph{remove} operations.
+The simulation ends once every collaborators received all operations.
+During the simulation, we take snapshots of the replicas' state at given steps to follow their evolution.
+
+We ran simulations with the following experimental settings: we deployed 10 bots as separate Docker containers on a single workstation.
+Each container corresponds to a single mono-threaded Node.js process simulating an author.
+Bots share and edit collaboratively the document using either LogootSplit or RenamableLogootSplit according to the session.
+In both cases, each bot performs an \emph{insert} or a \emph{remove} operation locally every 200 $\pm$ 50ms and broadcast it immediately to other nodes using a \ac{P2P} full mesh network.
+During the first phase, the probabilities of issuing \emph{insert} and \emph{remove} operations are respectively of 80\% and 20\%.
+Once the document reaches 60k characters (around 15 pages), bots switch to the second phase and set both probabilities to 50\%.
+After each local operation, the bot may move its cursor to another random position in the document with a probability of 5\%.
+Every bot generates 15k \emph{insert} or \emph{remove} operations and stops once it observed 150k operations.
+Snapshots of the state of bot are taken periodically, every 10k observed operations.
+
+Additionally, in the case of RenamableLogootSplit, from 1 to 4 bots are arbitrarily designated as \emph{renamingBots} according to the session.
+\emph{RenamingBots} issue \emph{rename} operations every time they observe 30k operations overall.
+These \emph{rename} operations are generated in a way ensuring that they are concurrent.
 
 \subsection{Results}
 
