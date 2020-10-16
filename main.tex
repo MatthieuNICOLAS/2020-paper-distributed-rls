@@ -759,20 +759,23 @@ After each local operation, the bot may move its cursor to another random positi
 Every bot generates 15k \emph{insert} or \emph{remove} operations and stops once it observed 150k operations.
 Snapshots of the state of bot are taken periodically, every 10k observed operations.
 
-Additionally, in the case of RenamableLogootSplit, from 1 to 4 bots are arbitrarily designated as \emph{renamingBots} according to the session.
-\emph{RenamingBots} issue \emph{rename} operations every time they observe 30k operations overall.
+Additionally, in the case of RenamableLogootSplit, from 1 to 4 bots are arbitrarily designated as \emph{renaming bots} according to the session.
+\emph{Renaming bots} issue \emph{rename} operations every time they observe 30k operations overall.
 These \emph{rename} operations are generated in a way ensuring that they are concurrent.
+
+Code, benchmarks and results are available at: \url{https://github.com/coast-team/mute-bot-random/}.
 
 \subsection{Results}
 
 \paragraph{Convergence}
 
-\begin{itemize}
-    \item Verified that nodes reach the same final state
-    \item Did not spot any divergence in our results
-    \item While it is an empirical result, not a proof...
-    \item ... it provides some confidence in our algorithms
-\end{itemize}
+We first proceeded to verify the convergence of nodes states at the end of simulations.
+For each simulation, we compared the final state of every nodes using their respective snapshots.
+We were able to confirm that nodes eventually converged without any communication other than operations, thus satisfying the \ac{SEC} consistency model.
+
+This result sets a first milestone in the validation of the correctness of RenamableLogootSplit.
+It is however only empirical.
+Further work to formally prove its correctness should be undertaken.
 
 \paragraph{Memory overhead}
 
