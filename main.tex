@@ -786,20 +786,27 @@ Further work to formally prove its correctness should be undertaken.
     \label{fig:evolution-document-size}
 \end{figure}
 
-\begin{itemize}
-    \item Display in \autoref{fig:evolution-document-size} the evolution of the size of the document throughout its lifetime
-    \item Compare the obtained results according to the number of \emph{renaming bots}, \ie the number of bots authorized to issue \emph{rename} operations
-    \item For each diagram, present 4 different data
-    \item Blue dashed line represents the size of the content
-    \item Red line represents the size of the LogootSplit document
-    \item Green dashed-dotted line represents RenamableLogootSplit best-case scenario. In this scenario, nodes assume that \emph{rename} operations become causally stable as soon as nodes received them. Nodes are able to garbage collect metadata introduced by the renaming mechanism, such as the \emph{former states}, instantaneously
-    \item Orange dotted line represents RenamableLogootSplit worst-case scenario. In this scenario, nodes assume that \emph{rename} operations never become causally stable. Nodes have thus to store renaming mechanism metadata indefinitely
-    \item Observe that RenamableLogootSplit is able to dispose of its overhead eventually, since overhead is garbage collected as \emph{rename} operations become causally stable. And this result is independent of the number of \emph{renaming bots}.
-    \item Observe that RenamableLogootSplit still outperforms LogootSplit in its worst-case scenario while the number \emph{renaming bots} remains low (1 or 2). This result can be explained by the fact that the renaming mechanism enable us to scrap as well the overhead of the data structure used in LogootSplit to represents the sequence.
-    \item But as the number of concurrent \emph{rename} operations increases, the performances of RenamableLogootSplit decreases as the number of \emph{former states} that nodes have to store to transform operations expand
-    \item So a greater number of \emph{renaming bots} may lead to a temporary expanded overhead, but which eventually subsides once causal stability is achieved.
-    \item In \autoref{sec:offloading-former-states}, we discuss that \emph{former states} may be offloaded until causal stability is achieved to address the temporary memory overhead
-\end{itemize}
+We then proceeded to measure the evolution of the document's memory consumption throughout the simulations, according to the CRDT used and the number of \emph{renaming bots}.
+We present the obtained results in \autoref{fig:evolution-document-size}.
+
+For each plot displayed in \autoref{fig:evolution-document-size}, we represent 4 different data.
+The blue dashed line illustrates the size of the actual content of the document, \ie the text, while the red line corresponds to the size of the whole LogootSplit document.
+
+The green dashed-dotted line represents the size of the RenamableLogootSplit document in the best case scenario.
+In this scenario, nodes assume that \emph{rename} operations are garbage-collectable as soon as they receive them.
+Nodes are thus able to benefit the effects of the renaming mechanism while removing its own metadata, such as \emph{former states} and epochs.
+In doing so, nodes are able to minimise periodically the metadata overhead of the data structure, independently of the number of \emph{renaming bots} and concurrent \emph{rename} operations issued.
+
+On the other hand, the orange dotted line represents the size of the RenamableLogootSplit document in the worst case scenario.
+In this scenario, nodes assume that \emph{rename} operations never become causally stable and can thus never be garbage-collected.
+Nodes have to permanently store the metadata introduced by the renaming mechanism.
+The performances of RenamableLogootSplit thus decrease as the number of \emph{renaming bots} and \emph{rename} operations issued increases.
+Nonetheless, we observe that RenamableLogootSplit can outperform LogootSplit even in this worst case scenario while the number of \emph{renaming bots} remains low (1 or 2).
+This result is explained by the fact that the renaming mechanism enables nodes to scrap the overhead of the internal data structure used to represent the document.
+
+To summarize the results presented, the renaming mechanism introduces a temporary metadata overhead which increases with each \emph{rename} operations.
+But the overhead will eventually subsides once the system becomes quiescent and \emph{rename} operations become causally stable.
+In \autoref{sec:offloading-former-states}, we discuss that \emph{former states} may be offloaded until may be offloaded until causal stability is achieved to address the temporary memory overhead.
 
 \paragraph{Integration times of standard operations}
 
