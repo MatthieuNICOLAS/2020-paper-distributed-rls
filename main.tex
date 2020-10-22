@@ -804,9 +804,9 @@ The performances of RenamableLogootSplit thus decrease as the number of \emph{re
 Nonetheless, we observe that RenamableLogootSplit can outperform LogootSplit even in this worst case scenario while the number of \emph{renaming bots} remains low (1 or 2).
 This result is explained by the fact that the renaming mechanism enables nodes to scrap the overhead of the internal data structure used to represent the document.
 
-To summarize the results presented, the renaming mechanism introduces a temporary metadata overhead which increases with each \emph{rename} operations.
+To summarise the results presented, the renaming mechanism introduces a temporary metadata overhead which increases with each \emph{rename} operations.
 But the overhead will eventually subsides once the system becomes quiescent and \emph{rename} operations become causally stable.
-In \autoref{sec:offloading-former-states}, we discuss that \emph{former states} may be offloaded until may be offloaded until causal stability is achieved to address the temporary memory overhead.
+In \autoref{sec:offloading-former-states}, we discuss that \emph{former states} may be offloaded until causal stability is achieved to address the temporary memory overhead.
 
 \paragraph{Integration times of standard operations}
 
@@ -827,14 +827,25 @@ In \autoref{sec:offloading-former-states}, we discuss that \emph{former states} 
     \label{fig:evolution-integration-time-insert}
 \end{figure}
 
-\begin{itemize}
-    \item In \autoref{fig:evolution-integration-time-insert}, compare the evolution of integration time of respectively local and remote operations on LogootSplit and RenamableLogootSplit documents
-    \item Orange boxplots correspond to times on LogootSplit documents while blue ones correspond to times on RenamableLogootSplit documents
-    \item Observe that integration times are faster on RenamableLogootSplit, as \emph{rename} operations improve the internal representation of the sequence
-    \item In \autoref{fig:evolution-integration-time-remote-insert}, also measure the integration times of remote operations from previous epochs, displayed in white, and of operations from concurrent epochs, displayed in red
-    \item Observe a negligible overhead for operations from previous epochs compared to remote operations from the same epochs, as nodes have to rename them beforehand. But still outperforms LogootSplit
-    \item Observe an additional overhead for operations from concurrent epochs, as nodes have to reverse the effect of the concurrent epoch first. Achieve performances comparable to LogootSplit ones in this worst-case scenario
-\end{itemize}
+We next compared the evolution of integration times of respectively local and remote operations on LogootSplit and RenamableLogootSplit documents.
+\autoref{fig:evolution-integration-time-insert} displays obtained results.
+
+In these figures, orange boxplots correspond to integration times on LogootSplit documents while blue ones correspond to times on RenamableLogootSplit documents.
+While both are initially equivalent, integration times on RenamableLogootSplit documents are then reduced compared to LogootSplit ones once \emph{rename} operations have been applied.
+This improvement is explained by the fact that \emph{rename} operations optimise the internal representation of the sequence.
+
+Additionally, in the case of remote operations, we measured specific integration times for RenamableLogootSplit : integration times of remote operations from previous epochs and from concurrent epochs, respectively displayed as white and red boxplots in \autoref{fig:evolution-integration-time-remote-insert}.
+Operations from previous epochs are operations generated concurrently to the \emph{rename} operation but applied after it.
+Since the operation has to be transformed beforehand using \autoref{alg:renameId}, we observe a computational overhead compared to other operations.
+But this overhead is actually compensated by the optimisation of the internal representation of the sequence performed by \emph{rename} operations.
+
+Regarding operations from concurrent epochs, we observe an additional overhead as nodes have first to reverse the effect the concurrent \emph{rename} operation using \autoref{alg:revertRenameId}.
+Because of this overhead, RenamableLogootSplit performances for these operations are comparable to LogootSplit ones.
+
+To summarise, transformation functions introduce an overhead with regard to integration times of concurrent operations to \emph{rename} ones.
+Despite this overhead, RenamableLogootSplit achieves better performances than LogootSplit as long as the distance between the epoch of generation of the operation and the current epoch of the node remains limited.
+As the distance between both epochs increases, it leads to cases presenting worse performances than LogootSplit ones since the overhead is multiplied.
+Nonetheless, the renaming mechanism reduces the integration times of the majority of operations, \ie the operations issued between two rounds of \emph{rename} operations.
 
 \paragraph{Integration time of \emph{rename} operation}
 
