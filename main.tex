@@ -872,12 +872,18 @@ We will discuss further this topic in \autoref{sec:postponing-transition-to-new-
 \subsection{Offloading on disk unused \emph{former states}}
 \label{sec:offloading-former-states}
 
-\begin{itemize}
-    \item \emph{Former states} are only needed to transform operations from previous or concurrent epochs
-    \item May receive these kind of operations in 2 cases : \emph{rename} operations are being issued or nodes (re)joined the collaboration
-    \item Between these events, \emph{former states} won't actually be needed
-    \item Can offload \emph{former states} on disk to reduce the memory overhead until causal stability is achieved, without impacting much performances
-\end{itemize}
+As explained in \autoref{sec:reverting-rename-op}, nodes have to store \emph{former states} corresponding to \emph{rename} operations to transform operations from previous or concurrent epochs.
+Nodes may receive such operations in 2 different cases :
+\begin{enumerate*}[label=(\roman*)]
+    \item nodes have recently issued \emph{rename} operations
+    \item nodes logged back in the collaboration.
+\end{enumerate*}
+Between these specific events, \emph{former states} are actually not needed to handle operations.
+
+We can thus propose the following trade-off : to offload \emph{former states} on the disk until their next use or that they can be garbage collected.
+It would enable nodes to mitigate the temporary memory overhead introduced by the renaming mechanism but increases integration times of operations requiring one of these \emph{former states}.
+Nodes could adopt various strategies to deem \emph{former states} offloadable and to retrieve them preemptively according to their constraints.
+The design of these strategies could be based on several heuristics : epochs of currently online nodes, number of nodes still able to issue concurrent operations, time elapsed since last use of the \emph{former state}...
 
 \subsection{Designing more effective \emph{priority} relation}
 \label{sec:designing-more-effective-priority-relation}
