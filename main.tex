@@ -885,7 +885,7 @@ It would enable nodes to mitigate the temporary memory overhead introduced by th
 Nodes could adopt various strategies to deem \emph{former states} offloadable and to retrieve them preemptively according to their constraints.
 The design of these strategies could be based on several heuristics : epochs of currently online nodes, number of nodes still able to issue concurrent operations, time elapsed since last use of the \emph{former state}...
 
-\subsection{Designing more effective \emph{priority} relation}
+\subsection{Designing a more effective \emph{priority} relation}
 \label{sec:designing-more-effective-priority-relation}
 
 Although the \emph{priority} relation proposed in \autoref{sec:priority} is simple and ensures that nodes designate the same epoch as the \emph{primary} one, it introduces a significant computational overhead in some cases.
@@ -895,20 +895,23 @@ The \emph{priority} relation should thus be designed to ensure convergence, but 
 In order to design the \emph{priority} relation, we could embed into \emph{rename} operations metrics representing the state of the system and the accumulated work on the document (number of nodes currently at the \emph{parent} epoch, number of operations generated at the \emph{parent epoch}, length of the document...).
 This way, we can favour the branch from the \emph{epoch tree} with the more and most active collaborators and prevent isolated nodes from overthrowing the existing order.
 
-\subsection{Postponing transition to new epoch in case of high concurrency}
+\subsection{Postponing transition to \emph{primary} epoch in case of high concurrency}
 \label{sec:postponing-transition-to-new-epoch}
 
-\begin{itemize}
-    \item Primary remote \emph{rename} operations are expensive to integrate as nodes have to browse and rename their whole current state in the process
-    \item It can introduce a significant computational overhead in some cases
-    \item For example a node may receive concurrent \emph{rename} operations in the reverse order to the one set by the \emph{priority} relation
-    \item The node would then consider each operation as the primary one and rename its state in a successive manner
-    \item On the other hand, secondary remote \emph{rename} operations are cheap to integrate as nodes simply add to their state a reference to the corresponding \emph{former state}
-    \item To reduce the likelihood and the negative impact of the scenario described previously, we can decompose the integration of \emph{rename} operations into two parts in case of concurrency detection
-    \item Nodes first process \emph{rename} operations as secondary ones. It enables nodes to integrate remote \emph{insert} and \emph{remove} operations, even from concurrent epochs, by transforming them
-    \item Then once nodes obtain a given amount of confidence that one \emph{rename} operation is the primary one, proceed to the renaming of their states
-    \item This strategy introduces a slight overhead for each \emph{insert} or \emph{remove} operation received during this period, but reduces the probability of erroneously integrating \emph{rename} operations as primary ones
-\end{itemize}
+As shown in \autoref{fig:evolution-integration-time-rename}, integrating \emph{primary rename} operations is expensive as nodes have to browse and rename their whole current state.
+This process can introduce a signification computational overhead in some cases.
+Especially, a node may receive concurrent \emph{rename} operations in the reverse order to the one defined by the \emph{priority} relation.
+In such a scenario, the node would successively consider every \emph{rename} operation as the \emph{primary} one and rename its state each time.
+On the other hand \emph{secondary rename} operations are cheap to integrate, as nodes simply add to their state a reference to the corresponding \emph{former state}.
+
+To mitigate the negative impact of the scenario described previously, we can decompose the integration of \emph{rename} operations into two parts in case of concurrency detection.
+First, nodes process \emph{rename} operations as secondary ones.
+It enables nodes to integrate remote \emph{insert} and \emph{remove} operations, even from concurrent epochs, by transforming them.
+Then each node keeps track of a level of confidence in the current \emph{primary} operation, computed for example from the time elapsed since the node received a concurrent \emph{rename} operation and the number of online nodes still known as using the \emph{parent} epoch.
+Once the level of confidence reaches a given threshold, the node renames its state according to the operation.
+
+This strategy introduces a slight computational overhead for each \emph{insert} or \emph{remove} operations received during the period of uncertainty, as nodes may issue operations from different epochs during that time.
+In return, the strategy reduces the probability of erroneously integrating \emph{rename} operations as \emph{primary} ones.
 
 \section{Related work}
 
