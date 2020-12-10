@@ -83,6 +83,7 @@
 \acrodefplural{ADT}[ADTs]{Abstract Data Types}
 \acrodef{CRDT}[CRDT]{Conflict-free Replicated Data Type}
 \acrodefplural{CRDT}[CRDTs]{Conflict-free Replicated Data Types}
+\acrodef{EC}[EC]{Eventual Consistency}
 \acrodef{JIT}[JIT]{Just-In-Time}
 \acrodef{LCA}[LCA]{Lowest Common Ancestor}
 \acrodef{OT}[OT]{Operational Transformation}
@@ -915,7 +916,31 @@ In return, the strategy reduces the probability of erroneously integrating \emph
 
 \section{Related work}
 
+Several works were proposed to address the growth of identifiers in variable-size identifiers Sequence \acp{CRDT}.
+We present in this section the most relevant ones to ours.
+
 \subsection{The core-nebula approach}
+
+The \emph{core-nebula} approach \cite{letia:hal-01248270, zawirski:hal-01248197} was proposed to reduce the size of identifiers in Treedoc\cite{5158449}, another variable-size identifiers Sequence \ac{CRDT}.
+
+In this work, authors introduce a \emph{rebalance} operation enabling nodes to reassign shorter identifiers to elements of the document.
+However, this \emph{rebalance} operation is not commutative with \emph{insert} and \emph{remove} operations nor with itself.
+To achieve \ac{EC}, the \emph{core-nebula} approach prevents concurrent \emph{rebalance} operations by regulating them using a consensus protocol.
+Operations such as \emph{insert} and \emph{remove} can still be issued without coordination and can thus be concurrent to \emph{rebalance} ones.
+To deal with this issue, authors propose a \emph{catch-up} protocol to transform these concurrent operations against the effects of \emph{rebalance} ones.
+
+Since consensus protocols do not scale well, the \emph{core-nebula} approach proposes to split nodes among two groups : the \emph{core} and the \emph{nebula}.
+The \emph{core} is a small set of stable and highly connected nodes while the \emph{nebula} is an unbounded set of dynamic nodes.
+Only nodes from the \emph{core} participate in the execution of the consensus protocol.
+Nodes from the \emph{nebula} can still contribute to the document by issuing \emph{insert} and \emph{remove} operations.
+
+Our work can be seen as an extension of this work.
+It adapts the \emph{rebalance} mechanism and the \emph{catch-up} protocol to LogootSplit andd take advantage of its block feature.
+Furthermore, it integrates a mechanism to deal with concurrent \emph{rename} operations, hence removing the requirement of a consensus protocol.
+It makes this approach usable in systems without existing authorities providing nodes to the \emph{core}.
+
+However, other systems can adopt the \emph{core-nebula} approach to simplify the implementation of RenamableLogootSplit.
+The use of a consensus protocol to regulate \emph{rename} operations enables systems to discard all parts dedicated to the handling of concurrent \emph{rename} operations, \ie the design of a \emph{priority} relation and the implementation of \autoref{alg:revertRenameId} and \autoref{rule:gc-concurrent-primary-epoch}.
 
 \subsection{The LSEQ approach}
 
