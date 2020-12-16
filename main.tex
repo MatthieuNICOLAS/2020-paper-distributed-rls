@@ -967,6 +967,25 @@ This would also enable to reduce the frequency of \emph{rename} operations, decr
 
 \section{Conclusions and future work}
 
+In this paper, we proposed an evolution of the variable-size identifier Sequence \ac{CRDT} : RenamableLogootSplit.
+This new version adds algorithms to handle concurrent \emph{rename} operations.
+Thanks to these algorithms, RenamableLogootSplit no longer needs to rely on consensus protocols to regulate the generation of \emph{rename} operations.
+We then proceeded to the empirical validation of this new version through experiments.
+Experiment results showed that RenamableLogootSplit reduces by hundreds times the metadata overhead of the data structure in the best-case scenario, independently of the number of concurrent \emph{rename} operations issued.
+On the other hand, in the worst-case scenario, the metadata introduced by the renaming mechanism increases with the number of \emph{rename} operations and may result in poorer performances.
+However, this problem can be addressed by offloading the renaming mechanism metadata to disk, as this data is only needed to handle specific operations.
+
+Regarding future work, we will now focus on the design of strategies to regulate the generation of \emph{rename} operations.
+These strategies have to meet two different goals.
+First, they have to minimise the impact of \emph{rename} operations on the user experience.
+User behaviour studies, inspired by \cite{ignat:hal-01088815,ignat:hal-01238831}, could be led in the context of real-time collaborative writing to set an acceptable upper-bound to their integration times.
+Strategies should then issue \emph{rename} operations accordingly to keep integration times below the defined threshold.
+Also, strategies have to minimise the likelihood of issuing concurrent \emph{rename} operations without relying on consensus protocols.
+Strategies should then use the node's local knowledge to determine whether the node should issue a \emph{rename} operation in given settings.
+
+Additionally, we would like to present a formal proof of the correctness of RenamableLogootSplit's algorithms.
+Another research trail we want to explore is to study data types to determine which ones could benefit from a combination of \ac{OT} techniques and \ac{CRDT} ones for the design of their replicated counterpart.
+
 \appendix
 
 \section{Algorithms}
