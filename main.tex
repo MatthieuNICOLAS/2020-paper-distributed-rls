@@ -925,7 +925,7 @@ The \emph{core-nebula} approach \cite{letia:hal-01248270, zawirski:hal-01248197}
 
 In this work, authors introduce a \emph{rebalance} operation enabling nodes to reassign shorter identifiers to elements of the document.
 However, this \emph{rebalance} operation is not commutative with \emph{insert} and \emph{remove} operations nor with itself.
-To achieve \ac{EC}, the \emph{core-nebula} approach prevents concurrent \emph{rebalance} operations by regulating them using a consensus protocol.
+To achieve \ac{EC}\cite{10.1145/224057.224070}, the \emph{core-nebula} approach prevents concurrent \emph{rebalance} operations by regulating them using a consensus protocol.
 Operations such as \emph{insert} and \emph{remove} can still be issued without coordination and can thus be concurrent to \emph{rebalance} ones.
 To deal with this issue, authors propose a \emph{catch-up} protocol to transform these concurrent operations against the effects of \emph{rebalance} ones.
 
@@ -935,7 +935,7 @@ Only nodes from the \emph{core} participate in the execution of the consensus pr
 Nodes from the \emph{nebula} can still contribute to the document by issuing \emph{insert} and \emph{remove} operations.
 
 Our work can be seen as an extension of this work.
-It adapts the \emph{rebalance} mechanism and the \emph{catch-up} protocol to LogootSplit andd take advantage of its block feature.
+It adapts the \emph{rebalance} mechanism and the \emph{catch-up} protocol to LogootSplit and takes advantage of its block feature.
 Furthermore, it integrates a mechanism to deal with concurrent \emph{rename} operations, hence removing the requirement of a consensus protocol.
 It makes this approach usable in systems without existing authorities providing nodes to the \emph{core}.
 
@@ -943,6 +943,27 @@ However, other systems can adopt the \emph{core-nebula} approach to simplify the
 The use of a consensus protocol to regulate \emph{rename} operations enables systems to discard all parts dedicated to the handling of concurrent \emph{rename} operations, \ie the design of a \emph{priority} relation and the implementation of \autoref{alg:revertRenameId} and \autoref{rule:gc-concurrent-primary-epoch}.
 
 \subsection{The LSEQ approach}
+
+The LSEQ approach \cite{nedelec_2013_lseq, doi:10.1002/cpe.4108} is another approach proposed to address the growth of identifiers in variable-size identifiers Sequence \ac{CRDT}. Instead of reducing periodically the identifier metadata using an expensive renaming mechanism, \citeauthor{nedelec_2013_lseq} define new identifier allocation strategies to reduce their growth rate.
+
+In this work, authors observe that the identifier allocation strategy proposed in Logoot\cite{WeissICDCS09} is suited to a single editing pattern : from left to right, top to bottom.
+If insertions are made according to other patterns, generated identifiers quickly saturate the space of possible identifiers for a given size.
+Following insertions therefore trigger an increase of the identifier size.
+As a result, Logoot identifiers grow linearly with the number of insertions instead of the expected logarithmic progression.
+
+LSEQ thus defines several identifier allocation strategy fitted to different editing pattern.
+Nodes pick randomly one of these strategies for each identifier size.
+Additionally LSEQ adopts an exponential tree model for identifiers : the range of possible identifiers doubles as the identifier size increases.
+\mnnote{TODO: Voir comment mieux formuler ce passage sur le nombre de bits alloués à \emph{position} qui double à chaque "profondeur" d'identifiant.}
+It enables LSEQ to fine-tune the size of identifiers according to needs.
+By combining the different allocation strategies to the exponential tree model, LSEQ achieves a polylogarithmic growth of identifiers according to the number of insertions.
+
+While the LSEQ approach reduces the growth rate of identifiers in variable-size identifier Sequence \ac{CRDT}, the sequence's overhead is still proportional to its number of elements.
+On the other hand, RenamableLogootSplit's renaming mechanism enables to reduce metadata to a fixed amount, independently of the number of elements.
+
+These two approaches are actually orthogonal and can, once again, be combined.
+The resulting system would reset the sequence's metadata periodically using \emph{rename} operations while LSEQ's identifier allocation strategies would reduce their growth in-between.
+This would also enable to reduce the frequency of \emph{rename} operations, decreasing the system computations overall.
 
 \section{Conclusions and future work}
 
