@@ -12,11 +12,13 @@
 \newtheorem{myrule}{Rule}
 \def\myruleautorefname{Rule} % \autoref
 
+\usepackage{booktabs} % \toprule, \midrule, \cmidrule, \bottomrule
+
 \usepackage[inline]{enumitem} % \begin{enumerate*} \end{enumerate*}
 \usepackage{tikz} % \begin{tikzpicture} \end{tikzpicture}
 \usetikzlibrary{shapes.misc}
 
-\usepackage{graphicx}
+\usepackage{graphicx} % \resizebox
 \usepackage{color}
 \AtBeginDocument{
 \definecolor{pdfurlcolor}{rgb}{0,0,0}
@@ -850,18 +852,50 @@ Nonetheless, the renaming mechanism reduces the integration times of the majorit
 
 \paragraph{Integration time of \emph{rename} operation}
 
-\begin{figure}[ht!]
+\begin{table}[ht!]
     \centering
-    \includegraphics[width=\columnwidth]{img/integration-time-boxplot-rename-op-without-outliers.pdf}
+    \resizebox{\columnwidth}{!}{
+        \begin{tabular}{llrrrr}
+            \toprule
+            \multicolumn{2}{c}{Parameters} & \multicolumn{4}{c}{Integration Time (ms)} \\
+            \cmidrule(lr){1-2} \cmidrule(lr){3-6}
+            Type & Nb Ops (k) &   Mean &   Median & 99\textsuperscript{th} Quant. &    Std \\
+            \midrule
+            Local & 30  &    41.75 &    38.74 &      71.68 &   6.84 \\
+                                    & 60  &    78.32 &    78.16 &      81.42 &   1.24 \\
+                                    & 90  &   119.19 &   118.87 &     124.22 &   2.49 \\
+                                    & 120 &   143.75 &   143.57 &     148.59 &   2.16 \\
+                                    & 150 &   158.04 &   157.95 &     164.38 &   2.49 \\
+            \cmidrule(lr){1-6}
+            Remote & 30  &   481.32 &   477.13 &     537.30 &  17.11 \\
+                                    & 60  &   981.62 &   978.24 &    1072.83 &  31.54 \\
+                                    & 90  &  1491.28 &  1481.83 &    1657.58 &  51.10 \\
+                                    & 120 &  1670.00 &  1663.85 &    1814.38 &  50.29 \\
+                                    & 150 &  1694.17 &  1675.95 &    1852.55 &  59.94 \\
+            \cmidrule(lr){1-6}
+            Prim. Remote & 30  &   643.53 &   643.57 &     682.80 &  13.42 \\
+                                    & 60  &  1317.66 &  1316.39 &    1399.55 &  28.67 \\
+                                    & 90  &  1998.23 &  1994.08 &    2111.98 &  45.37 \\
+                                    & 120 &  2239.71 &  2233.22 &    2368.45 &  50.06 \\
+                                    & 150 &  2241.92 &  2233.61 &    2351.02 &  52.20 \\
+            \cmidrule(lr){1-6}
+            Sec. Remote & 30  &     1.36 &     1.30 &       3.53 &   0.37 \\
+                                    & 60  &     2.82 &     2.69 &       4.85 &   0.45 \\
+                                    & 90  &     4.45 &     4.23 &       5.81 &   0.71 \\
+                                    & 120 &     5.33 &     5.10 &       8.78 &   0.90 \\
+                                    & 150 &     5.53 &     5.26 &       8.70 &   0.79 \\
+            \bottomrule
+        \end{tabular}
+    }
     \caption{Integration time of rename operations}
-    \label{fig:evolution-integration-time-rename}
-\end{figure}
+    \label{tab:evolution-integration-time-rename}
+\end{table}
 
 Finally, we measured the evolution of integration times of \emph{rename} operation according to the number of operations since the last \emph{rename} one.
-The results are displayed in \autoref{fig:evolution-integration-time-rename}.
+The results are displayed in \autoref{tab:evolution-integration-time-rename}.
 
 The main outcome of these measures are that \emph{rename} operations expensive compared to others.
-Local \emph{rename} operations, represented here as blue boxplots, take hundreds of milliseconds while remote ones and concurrent \emph{primary} ones, respectively in orange and red, may last seconds if delayed for too long.
+Local \emph{rename} operations take hundreds of milliseconds while remote ones and concurrent \emph{primary} ones may last seconds if delayed for too long.
 It is thus necessary to take this result into account when designing strategies to trigger \emph{rename} operations to prevent them from impacting negatively user experiences.
 
 Another interesting result from this benchmark is that concurrent \emph{secondary rename} operations are cheap to apply, as they only consist in storing corresponding \emph{former states}.
@@ -899,7 +933,7 @@ This way, we can favour the branch from the \emph{epoch tree} with the more and 
 \subsection{Postponing transition to \emph{primary} epoch in case of high concurrency}
 \label{sec:postponing-transition-to-new-epoch}
 
-As shown in \autoref{fig:evolution-integration-time-rename}, integrating \emph{primary rename} operations is expensive as nodes have to browse and rename their whole current state.
+As shown in \autoref{tab:evolution-integration-time-rename}, integrating \emph{primary rename} operations is expensive as nodes have to browse and rename their whole current state.
 This process can introduce a signification computational overhead in some cases.
 Especially, a node may receive concurrent \emph{rename} operations in the reverse order to the one defined by the \emph{priority} relation.
 In such a scenario, the node would successively consider every \emph{rename} operation as the \emph{primary} one and rename its state each time.
