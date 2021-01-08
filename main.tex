@@ -152,25 +152,65 @@
 
 \section{Background}
 
-\subsection{LogootSplit}
+Two main approaches were proposed to design efficient Sequence \acp{CRDT}.
+Both approaches aim to ensure the \ac{SEC} property while minimising the required overhead.
+To do so, these approaches assign identifiers to elements stored in the sequence.
+Nonetheless, they differ by the design and purpose of these identifiers.
+
+The first approach \cite{oster:inria-00108523, ROH2011354,briot:hal-01343941} is the fixed size identifiers approach.
+This approach use identifiers when inserting new elements to specify their predecessor.
+However this approach requires nodes to keep tombstones for removed elements in order to deal with operations concurrent to the \emph{remove} ones.
+The metadata overhead of such Sequences thus monotonically increases with each element inserted.
+
+The second approach \cite{5158449,WeissICDCS09,AndreCollaborateCom2013} is the variable size identifiers approach.
+This approach use identifiers to define a dense total order on elements.
+It enables nodes to delete safely elements and their identifier as soon as they are removed.
+However, it requires variable size identifiers to be able to generate new identifiers between two existing ones.
+The metadata overhead of such Sequences thus increases, as the size of such dense totally ordered identifiers grows over time.
+
+In the context of this paper, we focus on the later approach.
+
+\subsection{RenamableLogootSplit}
+
+\begin{itemize}
+    \item State of the art of the variable size identifiers approach
+    \item An extension of LogootSplit
+    \item Assign identifiers made of one or several tuples of the following form : \id{position}{node~id~node~seq}{offset} to order elements relatively to each others
+    \item Group elements with \emph{contiguous} identifiers into blocks to store them effectively
+    \item Aims to reduce LogootSplit's evergrowing metadata overhead periodically
+    \item To do so, propose a \emph{rename} operation
+    \item Enables nodes to reassign shorter and contiguous identifiers to elements
+    \item Resulting identifiers are designed in such way to enable to aggregate elements into one only block, minimising the overhead
+    \item To deal with concurrent \emph{insert} and \emph{remove} operations, propose to use \ac{OT} techniques to transform these operations against the effect of the \emph{rename} ones.
+\end{itemize}
 
 \subsection{Limits}
+
+\begin{itemize}
+    \item Two limits
+    \item First, nodes have to store the state on which the \emph{rename} operation took place, called \emph{former state}
+    \item Is required to transform concurrent \emph{insert} and \emph{remove} operations against the effect of the \emph{rename} operation
+    \item Can be safely garbage-collected once \emph{rename} operation is causally stable and not more concurrent operations can be safely issued by nodes \mnnote{NOTE: Aborder ce point dans Limits ou comme on ne s'attaque pas à cet aspect dans cette nouvelle version de RLS, ça ne sert pas à grand chose d'en parler ici ?}
+    \item Second, designed \emph{Rename} operation is not commutative with itself
+    \item Encounters a conflict if nodes generates concurrent \emph{rename} operations
+    \item Assume that nodes synchronise to issue \emph{rename} operations, for example using a consensus protocol
+    \item Actually not suitable to large scale distributed systems as consensus protocols do not scale
+\end{itemize}
 
 \section{Overview}
 
 \subsection{Proposed approach}
 
-We propose a new Sequence \ac{CRDT} belonging to the variable-size identifiers approach : \emph{RenamableLogootSplit} (RLS).
-
-This new \ac{CRDT} associates to LogootSplit a renaming mechanism.
-The goal of this mechanism is to overcome LogootSplit evergrowing memory overhead.
-To this end, the mechanism reassigns shorter identifiers to elements and aggregates them into fewer blocks in a fully distributed manner.
-
-We describe the behavior of the mechanism in \autoref{sec:renamablelogootsplit}.
+\begin{itemize}
+    \item Propose a new version of RenamableLogootSplit
+    \item Introduce additional mechanisms to enable nodes to resolve conflicts in case of concurrent \emph{rename} operations
+    \item Rework in consequence algorithms used to rename identifiers and to define as garbage-collectable \emph{former states}
+    \item Describe in details these additions in \autoref{sec:renamablelogootsplit}
+\end{itemize}
 
 \subsection{System Model}
 
-\mnnote{TODO: Reprendre la description du \emph{system model} de PaPoC}
+\mnnote{TODO: Reprendre la description du \emph{system model} de PaPoC, juste préciser que maintenant le renommage peut se faire sans coordination}
 
 \section{RenamableLogootSplit}
 \label{sec:renamablelogootsplit}
