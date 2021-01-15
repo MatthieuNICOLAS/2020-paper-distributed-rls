@@ -779,14 +779,14 @@ The aims of this evaluation are to measure
 \end{enumerate*}
 
 Unfortunately, we were not able to retrieve an existing dataset of real-time collaborative editing sessions.
-We thus setup simulations to generate the dataset on which run our benchmarks.
-These simulations mimic the scenario below.
+We thus setup simulations to generate the dataset used to run our benchmarks.
+These simulations mimic the following scenario.
 
 Several authors collaboratively write an article in real-time.
 First of all, the authors mainly specify the content of the article.
 Few \emph{remove} operations are issued in order to simulate spelling mistakes.
-Once the document reaches a arbitrary given critical length, collaborators move on to the second phase of the simulation.
-During this second phase, authors stop adding new content but instead focus on revamping existing parts.
+Once the document reaches an arbitrary given critical length, collaborators move on to the second phase of the simulation.
+During this phase, authors stop adding new content but instead focus on revamping existing parts.
 This is simulated by balancing the ratio between \emph{insert} and \emph{remove} operations.
 Every author has to issue a given number of \emph{insert} and \emph{remove} operations.
 The simulation ends once every collaborators received all operations.
@@ -795,14 +795,14 @@ During the simulation, we take snapshots of the replicas' state at given steps t
 We ran simulations with the following experimental settings: we deployed 10 bots as separate Docker containers on a single workstation.
 Each container corresponds to a single mono-threaded Node.js process simulating an author.
 Bots share and edit collaboratively the document using either LogootSplit or RenamableLogootSplit according to the session.
-In both cases, each bot performs an \emph{insert} or a \emph{remove} operation locally every 200 $\pm$ 50ms and broadcast it immediately to other nodes using a \ac{P2P} full mesh network.
-During the first phase, the probabilities of issuing \emph{insert} and \emph{remove} operations are respectively of 80\% and 20\%.
+In both cases, each bot performs an \emph{insert} or a \emph{remove} operation locally every 200 $\pm$ 50ms and broadcasts it immediately to other nodes using a \ac{P2P} full mesh network.
+During the first phase, the probability of issuing \emph{insert} (resp. \emph{remove}) operations is of 80\% (resp. 20\%).
 Once the document reaches 60k characters (around 15 pages), bots switch to the second phase and set both probabilities to 50\%.
 After each local operation, the bot may move its cursor to another random position in the document with a probability of 5\%.
 Every bot generates 15k \emph{insert} or \emph{remove} operations and stops once it observed 150k operations.
-Snapshots of the state of bot are taken periodically, every 10k observed operations.
+Snapshots of the state of bot are taken periodically every 10k observed operations.
 
-Additionally, in the case of RenamableLogootSplit, from 1 to 4 bots are arbitrarily designated as \emph{renaming bots} according to the session.
+Additionally, in the case of RenamableLogootSplit, 1 to 4 bots are arbitrarily designated as \emph{renaming bots} according to the session.
 \emph{Renaming bots} issue \emph{rename} operations every time they observe 30k operations overall.
 These \emph{rename} operations are generated in a way ensuring that they are concurrent.
 
@@ -814,7 +814,7 @@ Code, benchmarks and results are available at: \url{https://github.com/coast-tea
 
 We first proceeded to verify the convergence of nodes states at the end of simulations.
 For each simulation, we compared the final state of every nodes using their respective snapshots.
-We were able to confirm that nodes eventually converged without any communication other than operations, thus satisfying the \ac{SEC} consistency model.
+We were able to confirm that nodes converged without any communication other than operations, thus satisfying the \ac{SEC} consistency model.
 
 This result sets a first milestone in the validation of the correctness of RenamableLogootSplit.
 It is however only empirical.
@@ -833,7 +833,7 @@ We then proceeded to measure the evolution of the document's memory consumption 
 We present the obtained results in \autoref{fig:evolution-document-size}.
 
 For each plot displayed in \autoref{fig:evolution-document-size}, we represent 4 different data.
-The blue dashed line illustrates the size of the actual content of the document, \ie the text, while the red line corresponds to the size of the whole LogootSplit document.
+The blue dashed line illustrates the size of the actual content of the document, \ie the text, while the red solid line corresponds to the size of the whole LogootSplit document.
 
 The green dashed-dotted line represents the size of the RenamableLogootSplit document in the best case scenario.
 In this scenario, nodes assume that \emph{rename} operations are garbage-collectable as soon as they receive them.
@@ -870,11 +870,11 @@ In \autoref{sec:offloading-former-states}, we discuss that \emph{former states} 
     \label{fig:evolution-integration-time-insert}
 \end{figure}
 
-We next compared the evolution of integration times of respectively local and remote operations on LogootSplit and RenamableLogootSplit documents.
-\autoref{fig:evolution-integration-time-insert} displays obtained results.
+Next, we compared the evolution of integration times of respectively local and remote operations on LogootSplit and RenamableLogootSplit documents.
+\autoref{fig:evolution-integration-time-insert} displays the results.
 
 In these figures, orange boxplots correspond to integration times on LogootSplit documents while blue ones correspond to times on RenamableLogootSplit documents.
-While both are initially equivalent, integration times on RenamableLogootSplit documents are then reduced compared to LogootSplit ones once \emph{rename} operations have been applied.
+While both are initially equivalent, integration times on RenamableLogootSplit documents are then reduced when compared to LogootSplit ones once \emph{rename} operations have been applied.
 This improvement is explained by the fact that \emph{rename} operations optimise the internal representation of the sequence.
 
 Additionally, in the case of remote operations, we measured specific integration times for RenamableLogootSplit : integration times of remote operations from previous epochs and from concurrent epochs, respectively displayed as white and red boxplots in \autoref{fig:evolution-integration-time-remote-insert}.
@@ -882,8 +882,8 @@ Operations from previous epochs are operations generated concurrently to the \em
 Since the operation has to be transformed beforehand using \autoref{alg:renameId}, we observe a computational overhead compared to other operations.
 But this overhead is actually compensated by the optimisation of the internal representation of the sequence performed by \emph{rename} operations.
 
-Regarding operations from concurrent epochs, we observe an additional overhead as nodes have first to reverse the effect the concurrent \emph{rename} operation using \autoref{alg:revertRenameId}.
-Because of this overhead, RenamableLogootSplit performances for these operations are comparable to LogootSplit ones.
+Regarding operations from concurrent epochs, we observe an additional overhead as nodes have first to reverse the effect of the concurrent \emph{rename} operation using \autoref{alg:revertRenameId}.
+Because of this overhead, RenamableLogootSplit's performances for these operations are comparable to LogootSplit ones.
 
 To summarise, transformation functions introduce an overhead with regard to integration times of concurrent operations to \emph{rename} ones.
 Despite this overhead, RenamableLogootSplit achieves better performances than LogootSplit as long as the distance between the epoch of generation of the operation and the current epoch of the node remains limited.
@@ -934,12 +934,12 @@ Nonetheless, the renaming mechanism reduces the integration times of the majorit
 Finally, we measured the evolution of integration times of \emph{rename} operation according to the number of operations since the last \emph{rename} one.
 The results are displayed in \autoref{tab:evolution-integration-time-rename}.
 
-The main outcome of these measures are that \emph{rename} operations expensive compared to others.
+The main outcome of these measures shows that \emph{rename} operations are expensive when compared to others.
 Local \emph{rename} operations take hundreds of milliseconds while remote ones and concurrent \emph{primary} ones may last seconds if delayed for too long.
 It is thus necessary to take this result into account when designing strategies to trigger \emph{rename} operations to prevent them from impacting negatively user experiences.
 
-Another interesting result from this benchmark is that concurrent \emph{secondary rename} operations are cheap to apply, as they only consist in storing corresponding \emph{former states}.
-Nodes can thus significantly reduce the overall computations of a set of concurrent \emph{rename} operations by applying them in a specific order.
+Another interesting result from this benchmark is that concurrent \emph{secondary rename} operations are cheap to apply, as they only consist in storage of corresponding \emph{former states}.
+Thus nodes can significantly reduce the overall computations of a set of concurrent \emph{rename} operations by applying them in a specific order.
 We will discuss further this topic in \autoref{sec:postponing-transition-to-new-epoch}.
 
 \section{Discussion}
@@ -948,14 +948,14 @@ We will discuss further this topic in \autoref{sec:postponing-transition-to-new-
 \label{sec:offloading-former-states}
 
 As explained in \autoref{sec:reverting-rename-op}, nodes have to store \emph{former states} corresponding to \emph{rename} operations to transform operations from previous or concurrent epochs.
-Nodes may receive such operations in 2 different cases :
+Nodes may receive such operations given 2 different cases :
 \begin{enumerate*}[label=(\roman*)]
     \item nodes have recently issued \emph{rename} operations
     \item nodes logged back in the collaboration.
 \end{enumerate*}
 Between these specific events, \emph{former states} are actually not needed to handle operations.
 
-We can thus propose the following trade-off : to offload \emph{former states} on the disk until their next use or that they can be garbage collected.
+We can thus propose the following trade-off : to offload \emph{former states} on the disk until their next use or until they can be garbage collected.
 It would enable nodes to mitigate the temporary memory overhead introduced by the renaming mechanism but increases integration times of operations requiring one of these \emph{former states}.
 Nodes could adopt various strategies to deem \emph{former states} offloadable and to retrieve them preemptively according to their constraints.
 The design of these strategies could be based on several heuristics : epochs of currently online nodes, number of nodes still able to issue concurrent operations, time elapsed since last use of the \emph{former state}...
@@ -967,7 +967,7 @@ Although the \emph{priority} relation proposed in \autoref{sec:priority} is simp
 Notably it allows a single node, disjoined from the collaboration since a long time, to force every other nodes to revert \emph{rename} operations they performed meanwhile because its own \emph{rename} operation is deemed as the \emph{primary} one.
 
 The \emph{priority} relation should thus be designed to ensure convergence, but also to minimise the overall amount of computations performed by nodes of the system.
-In order to design the \emph{priority} relation, we could embed into \emph{rename} operations metrics representing the state of the system and the accumulated work on the document (number of nodes currently at the \emph{parent} epoch, number of operations generated at the \emph{parent epoch}, length of the document...).
+In order to design the \emph{priority} relation, we could embed into \emph{rename} operations metrics that represent the state of the system and the accumulated work on the document (number of nodes currently at the \emph{parent} epoch, number of operations generated at the \emph{parent epoch}, length of the document...).
 This way, we can favour the branch from the \emph{epoch tree} with the more and most active collaborators and prevent isolated nodes from overthrowing the existing order.
 
 \subsection{Postponing transition to \emph{primary} epoch in case of high concurrency}
@@ -976,10 +976,10 @@ This way, we can favour the branch from the \emph{epoch tree} with the more and 
 As shown in \autoref{tab:evolution-integration-time-rename}, integrating \emph{primary rename} operations is expensive as nodes have to browse and rename their whole current state.
 This process can introduce a signification computational overhead in some cases.
 Especially, a node may receive concurrent \emph{rename} operations in the reverse order to the one defined by the \emph{priority} relation.
-In such a scenario, the node would successively consider every \emph{rename} operation as the \emph{primary} one and rename its state each time.
+In this scenario, the node would successively consider every \emph{rename} operation as the \emph{primary} one and would rename its state each time.
 On the other hand \emph{secondary rename} operations are cheap to integrate, as nodes simply add to their state a reference to the corresponding \emph{former state}.
 
-To mitigate the negative impact of the scenario described previously, we can decompose the integration of \emph{rename} operations into two parts in case of concurrency detection.
+To mitigate the negative impact of this scenario, we can decompose the integration of \emph{rename} operations into two parts in case of concurrency detection.
 First, nodes process \emph{rename} operations as secondary ones.
 It enables nodes to integrate remote \emph{insert} and \emph{remove} operations, even from concurrent epochs, by transforming them.
 Then each node keeps track of a level of confidence in the current \emph{primary} operation, computed for example from the time elapsed since the node received a concurrent \emph{rename} operation and the number of online nodes still known as using the \emph{parent} epoch.
@@ -990,8 +990,8 @@ In return, the strategy reduces the probability of erroneously integrating \emph
 
 \section{Related work}
 
-Several works were proposed to address the growth of identifiers in variable-size identifiers Sequence \acp{CRDT}.
-We present in this section the most relevant ones to ours.
+Several works were proposed to address our problem of growth of identifiers in variable-size identifiers Sequence \acp{CRDT}.
+We present in this section the most relevant ones.
 
 \subsection{The core-nebula approach}
 
@@ -1035,7 +1035,7 @@ By combining the different allocation strategies to the exponential tree model, 
 While the LSEQ approach reduces the growth rate of identifiers in variable-size identifier Sequence \ac{CRDT}, the sequence's overhead is still proportional to its number of elements.
 On the other hand, RenamableLogootSplit's renaming mechanism enables to reduce metadata to a fixed amount, independently of the number of elements.
 
-These two approaches are actually orthogonal and can, once again, be combined.
+These two approaches are actually orthogonal and can, as in the previous approach, be combined.
 The resulting system would reset the sequence's metadata periodically using \emph{rename} operations while LSEQ's identifier allocation strategies would reduce their growth in-between.
 This would also enable to reduce the frequency of \emph{rename} operations, decreasing the system computations overall.
 
@@ -1049,12 +1049,12 @@ Experiment results showed that RenamableLogootSplit reduces by hundreds times th
 On the other hand, in the worst-case scenario, the metadata introduced by the renaming mechanism increases with the number of \emph{rename} operations and may result in poorer performances.
 However, this problem can be addressed by offloading the renaming mechanism metadata to disk, as this data is only needed to handle specific operations.
 
-Regarding future work, we will now focus on the design of strategies to regulate the generation of \emph{rename} operations.
+As future work, we will now focus on the design of strategies to regulate the generation of \emph{rename} operations.
 These strategies have to meet two different goals.
 First, they have to minimise the impact of \emph{rename} operations on the user experience.
 User behaviour studies, inspired by \cite{ignat:hal-01088815,ignat:hal-01238831}, could be led in the context of real-time collaborative writing to set an acceptable upper-bound to their integration times.
 Strategies should then issue \emph{rename} operations accordingly to keep integration times below the defined threshold.
-Also, strategies have to minimise the likelihood of issuing concurrent \emph{rename} operations without relying on consensus protocols.
+Secondly, strategies have to minimise the likelihood of issuing concurrent \emph{rename} operations without relying on consensus protocols.
 Strategies should then use the node's local knowledge to determine whether the node should issue a \emph{rename} operation or trust another to do so.
 
 Additionally, we would like to present a formal proof of the correctness of RenamableLogootSplit's algorithms.
